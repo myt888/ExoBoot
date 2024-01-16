@@ -76,8 +76,8 @@ def main(writer_Loop_l):
 			# act_current = actPackStateR.mot_cur # mA2
 			
 			# data_frame_vec = [i, round(run_time,6), act_ank_angleR, act_mot_angleR, act_current]
-			# data_frame_vec = [i, round(run_time,6), act_ank_angleR, act_mot_angleR]
-			data_frame_vec = [i, round(run_time,6), actPackStateR]
+			data_frame_vec = [i, round(run_time,6), act_ank_angleR, act_mot_angleR]
+			# data_frame_vec = [i, round(run_time,6), actßackStateR]
 
 			writer_Loop_l.writerow(data_frame_vec)
 			sleep(0.001)
