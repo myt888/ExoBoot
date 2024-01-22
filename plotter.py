@@ -4,64 +4,72 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def adjusted_data(time, angle, initial_average_range, threshold):
+    initial_value = np.mean(angle[:initial_average_range])
+    start_index = next((i for i, angle in enumerate(angle) if abs(angle - initial_value) > threshold), None)
+
+    adjusted_time = [t - time[start_index] for t in time[start_index:]]
+    adjusted_angle = angle[start_index:]
+    return adjusted_time, adjusted_angle
+
+
 def load_csv(file_path):
     with open(file_path, mode='r') as file:
         reader = csv.reader(file)
 
-        iterations = []
+        #iterations = []
         ankle_angle = []
         time = []
 
         for row in reader:
             if float(row[2]) != 0:
-                iterations.append(int(row[0]))
+                #iterations.append(int(row[0]))
                 time.append(float(row[1]))
                 ankle_angle.append(float(row[2]))
-        
-        initial_average_range = 1000
-        initial_value = np.mean(ankle_angle[:initial_average_range])
-        threshold = 0.08
 
-        for index, value in enumerate(ankle_angle):
-            if abs(value - initial_value) > threshold:
-                start_index = index
-                break
+        # Adjusting time and angle
+        adjusted_time, raw_angles = adjusted_data(time, ankle_angle, 1000, 0.1)
+        initial_angle = raw_angles[0]
+        adjusted_angles = [-(angle - initial_angle) for angle in raw_angles]
+        # Trim the constant data points at the end
+        end_value = np.mean(adjusted_angles[-1000:])
+        end_index = next((len(adjusted_angles) - i for i, angle in enumerate(reversed(adjusted_angles), 1) if abs(angle - end_value) > 0.5), None) # Threshold is larger
 
-        return iterations[start_index:], time[start_index:], ankle_angle[start_index:]
+        return adjusted_time[:end_index], adjusted_angles[:end_index]
     
+
 def load_mat(file_path): 
     mat_data = scipy.io.loadmat(file_path)
 
     JIM_time = mat_data['output'][:,0]
     JIM_angle = np.degrees(mat_data['output'][:,1])
-    # torque = mat_data['output'][:,2]
 
-    return JIM_time, JIM_angle
+    # Adjusting time
+    adjusted_time, adjusted_angle = adjusted_data(JIM_time, JIM_angle, 100, 0.05)
+
+    return adjusted_time, adjusted_angle
+
+
+def plot_combined_data(encoder_time, encoder_angle, JIM_time, JIM_angle):
+    plt.figure(figsize=(8, 6))
+    plt.scatter(JIM_time, JIM_angle, label='JIM Angle', color='red', s=3)
+    plt.scatter(encoder_time, encoder_angle, label='Encoder Angle', color='blue', s=3)
+    plt.xlabel('Time')
+    plt.ylabel('Ankle Angle')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
 
 #Load Files
 file_path_encoder = r"I:\My Drive\Neurobionics\ExoBoot\Data\20240118-171052_encoder_test_data_R.csv"
 file_path_JIM = r"I:\My Drive\Neurobionics\ExoBoot\Data\JIM\encoderchecktest2.mat"
 
-encoder_i, encoder_time, encoder_angle = load_csv(file_path_encoder)
+encoder_time, encoder_angle = load_csv(file_path_encoder)
 JIM_time, JIM_angle = load_mat(file_path_JIM)
 
-print("Encoder Starting Time:{:.2f} s".format(encoder_time[0]))
-print("First Ankle Angle:{:.2f} deg".format(encoder_angle[0]))
+encoder_changes = np.diff(encoder_angle)
+print(len(encoder_changes))
+print(len(encoder_angle))
 
-#Plot
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
-
-# First subplot
-ax1.scatter(encoder_time, encoder_angle, label='Encoder Angle', color='blue', s=5)
-ax1.set_xlabel('Time')
-ax1.set_ylabel('Ankle Angle')
-ax1.grid(True)
-ax1.legend()
-# Second subplot
-ax2.scatter(JIM_time, JIM_angle, label='JIM Angle', color='red',s=5)
-ax2.set_xlabel('Time')
-ax2.set_ylabel('JIM Angle')
-ax2.grid(True)
-ax2.legend()
-
-plt.show()
+plot_combined_data(encoder_time, encoder_angle, JIM_time, JIM_angle)
