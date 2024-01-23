@@ -60,16 +60,20 @@ def plot_combined_data(encoder_time, encoder_angle, JIM_time, JIM_angle):
     plt.legend()
     plt.show()
 
+def plot_data(encoder_time, encoder_angle):
+    plt.figure(figsize=(8, 6))
+    plt.scatter(encoder_time, encoder_angle, label='Encoder Angle', color='blue', s=3)
+    plt.xlabel('Time')
+    plt.ylabel('Ankle Angle')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
 
 #Load Files
-file_path_encoder = r"I:\My Drive\Neurobionics\ExoBoot\Data\20240118-171052_encoder_test_data_R.csv"
-file_path_JIM = r"I:\My Drive\Neurobionics\ExoBoot\Data\JIM\encoderchecktest2.mat"
+file_path_encoder = r"/home/pi/ExoBoot/Data/20240123-133048_encoder_data_R.csv"
+# file_path_JIM = r"I:\My Drive\Neurobionics\ExoBoot\Data\JIM\encoderchecktest2.mat"
 
 encoder_time, encoder_angle = load_csv(file_path_encoder)
-JIM_time, JIM_angle = load_mat(file_path_JIM)
+# JIM_time, JIM_angle = load_mat(file_path_JIM)
 
-encoder_changes = np.diff(encoder_angle)
-print(len(encoder_changes))
-print(len(encoder_angle))
-
-plot_combined_data(encoder_time, encoder_angle, JIM_time, JIM_angle)
+plot_data(encoder_time, encoder_angle)
