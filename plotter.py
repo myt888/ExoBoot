@@ -50,27 +50,25 @@ def load_mat(file_path):
     return adjusted_time, adjusted_angle
 
 
-def plot_combined_data(encoder_time, encoder_angle, JIM_time, JIM_angle):
+def plot_data(encoder_time, encoder_angle, JIM_time=None, JIM_angle=None):
     plt.figure(figsize=(8, 6))
-    plt.scatter(JIM_time, JIM_angle, label='JIM Angle', color='red', s=3)
+
+    # Always plot the first dataset
     plt.scatter(encoder_time, encoder_angle, label='Encoder Angle', color='blue', s=3)
+
+    # Plot the second dataset only if both time and angle are provided
+    if JIM_time is not None and JIM_angle is not None:
+        plt.scatter(JIM_time, JIM_angle, label='JIM Angle', color='red', s=3)
+
     plt.xlabel('Time')
     plt.ylabel('Ankle Angle')
     plt.grid(True)
     plt.legend()
     plt.show()
 
-def plot_data(encoder_time, encoder_angle):
-    plt.figure(figsize=(8, 6))
-    plt.scatter(encoder_time, encoder_angle, label='Encoder Angle', color='blue', s=3)
-    plt.xlabel('Time')
-    plt.ylabel('Ankle Angle')
-    plt.grid(True)
-    plt.legend()
-    plt.show()
 
 #Load Files
-file_path_encoder = r"/home/pi/ExoBoot/Data/20240123-133048_encoder_data_R.csv"
+file_path_encoder = r"/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Neurobionics/ExoBoot/Data/20240123-133048_encoder_data_R.csv"
 # file_path_JIM = r"I:\My Drive\Neurobionics\ExoBoot\Data\JIM\encoderchecktest2.mat"
 
 encoder_time, encoder_angle = load_csv(file_path_encoder)
