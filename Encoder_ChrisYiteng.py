@@ -105,9 +105,9 @@ def main(writer_Loop_l):
 if __name__ == '__main__':
 
 	data_filename = '{0}_encoder_data_R.csv'.format(strftime("%Y%m%d-%H%M%S"))
-	file_path = '/home/pi/ExoBoot/Data'
+	file_path = '/home/pi/ExoBoot/data'
 	data_path = os.path.join(file_path, data_filename)
-
+d
 	with open(data_path, "w", newline="\n") as fd_Loop_l:
 		writer_Loop_l = csv.writer(fd_Loop_l)
 		main(writer_Loop_l)
