@@ -43,20 +43,18 @@ def load_mat(file_path):
 
     JIM_time = mat_data['output'][:,0]
     JIM_angle = np.degrees(mat_data['output'][:,1])
+    JIM_torque = mat_data['output'][:,2]
 
     # Adjusting time
     adjusted_time, adjusted_angle = adjusted_data(JIM_time, JIM_angle, 100, 0.05)
 
-    return adjusted_time, adjusted_angle
+    return adjusted_time, adjusted_angle, JIM_time, JIM_angle, JIM_torque
 
 
-def plot_data(encoder_time, encoder_angle, JIM_time=None, JIM_angle=None):
+def plot_angle_data(encoder_time = None, encoder_angle = None, JIM_time = None, JIM_angle = None):
     plt.figure(figsize=(8, 6))
-
-    # Always plot the first dataset
     plt.scatter(encoder_time, encoder_angle, label='Encoder Angle', color='blue', s=3)
 
-    # Plot the second dataset only if both time and angle are provided
     if JIM_time is not None and JIM_angle is not None:
         plt.scatter(JIM_time, JIM_angle, label='JIM Angle', color='red', s=3)
 
@@ -67,11 +65,23 @@ def plot_data(encoder_time, encoder_angle, JIM_time=None, JIM_angle=None):
     plt.show()
 
 
+def plot_torque_data(JIM_angle, JIM_torque):
+    plt.figure(figsize=(8, 6))
+    plt.scatter(JIM_angle, JIM_torque, label='Encoder Angle', color='blue', s=3)
+
+    plt.xlabel('Angle')
+    plt.ylabel('Torque')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
+
 #Load Files
-file_path_encoder = r"/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Neurobionics/ExoBoot/Data/20240123-133048_encoder_data_R.csv"
-# file_path_JIM = r"I:\My Drive\Neurobionics\ExoBoot\Data\JIM\encoderchecktest2.mat"
+file_path_encoder = r"I:\My Drive\Neurobionics\ExoBoot\data\encoder_check_test_1.csv"
+file_path_JIM = r"I:\My Drive\Neurobionics\ExoBoot\cam_torque_angle\CAL_long_slowsinewithpad001.mat"
 
-encoder_time, encoder_angle = load_csv(file_path_encoder)
-# JIM_time, JIM_angle = load_mat(file_path_JIM)
+encoder_time_adj, encoder_angle_adj = load_csv(file_path_encoder)
+JIM_time_adj, JIM_angle_adj, JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM)
 
-plot_data(encoder_time, encoder_angle)
+# plot_angle_data(encoder_time, encoder_angle)
+plot_torque_data(JIM_angle, JIM_torque)
