@@ -13,7 +13,7 @@ def adjusted_data(time, angle, initial_average_range, threshold):
     return adjusted_time, adjusted_angle
 
 
-def load_csv(file_path):
+def load_csv(file_path, adjust = False):
     with open(file_path, mode='r') as file:
         reader = csv.reader(file)
 
@@ -27,28 +27,33 @@ def load_csv(file_path):
                 time.append(float(row[1]))
                 ankle_angle.append(float(row[2]))
 
-        # Adjusting time and angle
-        adjusted_time, raw_angles = adjusted_data(time, ankle_angle, 1000, 0.1)
-        initial_angle = raw_angles[0]
-        adjusted_angles = [-(angle - initial_angle) for angle in raw_angles]
-        # Trim the constant data points at the end
-        end_value = np.mean(adjusted_angles[-1000:])
-        end_index = next((len(adjusted_angles) - i for i, angle in enumerate(reversed(adjusted_angles), 1) if abs(angle - end_value) > 0.5), None) # Threshold is larger
+        if adjust == True:
+            # Adjusting time and angle
+            adjusted_time, raw_angles = adjusted_data(time, ankle_angle, 1000, 0.1)
+            initial_angle = raw_angles[0]
+            adjusted_angles = [-(angle - initial_angle) for angle in raw_angles]
 
-        return adjusted_time[:end_index], adjusted_angles[:end_index]
+            # Trim the constant data points at the end
+            end_value = np.mean(adjusted_angles[-1000:])
+            end_index = next((len(adjusted_angles) - i for i, angle in enumerate(reversed(adjusted_angles), 1) if abs(angle - end_value) > 0.5), None) # Threshold is larger
+
+            return adjusted_time[:end_index], adjusted_angles[:end_index]
+        else:
+            return time, ankle_angle
     
 
-def load_mat(file_path): 
+def load_mat(file_path, adjust = False): 
     mat_data = scipy.io.loadmat(file_path)
 
     JIM_time = mat_data['output'][:,0]
     JIM_angle = np.degrees(mat_data['output'][:,1])
     JIM_torque = mat_data['output'][:,2]
 
-    # Adjusting time
-    adjusted_time, adjusted_angle = adjusted_data(JIM_time, JIM_angle, 100, 0.05)
-
-    return adjusted_time, adjusted_angle, JIM_time, JIM_angle, JIM_torque
+    if adjust == True:
+        adjusted_time, adjusted_angle = adjusted_data(JIM_time, JIM_angle, 100, 0.05)
+        return adjusted_time, adjusted_angle
+    else:
+        return JIM_time, JIM_angle, JIM_torque
 
 
 def plot_angle_data(encoder_time = None, encoder_angle = None, JIM_time = None, JIM_angle = None):
@@ -65,11 +70,12 @@ def plot_angle_data(encoder_time = None, encoder_angle = None, JIM_time = None, 
     plt.show()
 
 
-def plot_torque_data(JIM_angle, JIM_torque):
+def plot_torque_data(JIM_angle_cal, JIM_torque_cal, JIM_angle, JIM_torque):
     plt.figure(figsize=(8, 6))
-    plt.scatter(JIM_angle, JIM_torque, label='Encoder Angle', color='blue', s=3)
-
-    plt.xlabel('Angle')
+    plt.scatter(JIM_angle_cal, JIM_torque_cal, label='Calibration', color='blue', s=1)
+    plt.scatter(JIM_angle, JIM_torque, label='Torque', color='red', s=1)
+    plt.scatter(JIM_angle, JIM_torque-JIM_torque_cal, label='Torque_cam', color='green', s=1)
+    plt.xlabel('Time')
     plt.ylabel('Torque')
     plt.grid(True)
     plt.legend()
@@ -78,10 +84,13 @@ def plot_torque_data(JIM_angle, JIM_torque):
 
 #Load Files
 file_path_encoder = r"I:\My Drive\Neurobionics\ExoBoot\data\encoder_check_test_1.csv"
-file_path_JIM = r"I:\My Drive\Neurobionics\ExoBoot\cam_torque_angle\CAL_long_slowsinewithpad001.mat"
+file_path_JIM_cal = r"I:\My Drive\Neurobionics\ExoBoot\cam_torque_angle\CAL_long_slowsinewithpad001.mat"
+file_path_JIM = r"I:\My Drive\Neurobionics\ExoBoot\cam_torque_angle\EXO_long_slowsinewithpad001.mat"
 
 encoder_time_adj, encoder_angle_adj = load_csv(file_path_encoder)
-JIM_time_adj, JIM_angle_adj, JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM)
+JIM_time_cal, JIM_angle_cal, JIM_torque_cal = load_mat(file_path_JIM_cal)
+JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM)
+
 
 # plot_angle_data(encoder_time, encoder_angle)
-plot_torque_data(JIM_angle, JIM_torque)
+plot_torque_data(JIM_time_cal, JIM_torque_cal, JIM_time, JIM_torque)
