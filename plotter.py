@@ -70,7 +70,7 @@ def load_csv(file_path, adjust = False):
             return time, ankle_angle
 
 
-def load_mat(file_path, calibration_path=None, adjust=False, lpf=False, cutoff=0.05, fs=100, order=5):
+def load_mat(file_path, calibration_path=None, adjust=False, lpf=False, cutoff=5, fs=100, order=5):
     mat_data = scipy.io.loadmat(file_path)
 
     JIM_time = mat_data['output'][:,0]
@@ -95,7 +95,7 @@ def load_mat(file_path, calibration_path=None, adjust=False, lpf=False, cutoff=0
         return JIM_time, JIM_angle, JIM_torque
 
 
-def plot_angle_data(encoder_time = None, encoder_angle = None, JIM_time = None, JIM_angle = None):
+def plot_angle_data(encoder_time, encoder_angle, JIM_time = None, JIM_angle = None):
     plt.figure(figsize=(8, 6))
     plt.scatter(encoder_time, encoder_angle, label='Encoder Angle', color='blue', s=3)
 
@@ -108,33 +108,29 @@ def plot_angle_data(encoder_time = None, encoder_angle = None, JIM_time = None, 
     plt.legend()
     plt.show()
 
-
-def plot_torque_data(JIM_angle_cal, JIM_torque_cal, JIM_angle, JIM_torque):
+def plot_torque_data(angle_1, torque_1, angle_2 = None, torque_2 = None):
     plt.figure(figsize=(8, 6))
-    # plt.scatter(JIM_angle_cal, JIM_torque_cal, label='Calibration', color='blue', s=1)
-    # plt.scatter(JIM_angle, JIM_torque, label='Torque', color='red', s=1)
-    plt.scatter(JIM_angle, JIM_torque - JIM_torque_cal, label='Torque_cam', color='blue', s=1)
+    plt.scatter(angle_1, torque_1, label='Torque_cam', color='Black', s=1)
+    if angle_2 is not None and torque_2 is not None:
+        plt.scatter(angle_2, torque_2, label='Torque_cam_filtered', color='Red', s=1)
     plt.xlabel('Angle')
     plt.ylabel('Torque')
     plt.grid(True)
     plt.legend()
     plt.show()
 
-
 def plot_cam_data():
     plt.figure(figsize=(10, 8))
 
-    # Loop through file indices
     for i in range(1, 6):
         file_index = f"{i:03d}"  # Formats the index as 3 digits with leading zeros
 
         file_path_JIM_cal = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\CAL_long_slowsinewithpad{file_index}.mat"
         file_path_JIM = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\EXO_long_slowsinewithpad{file_index}.mat"
 
-        JIM_time_cal, JIM_angle_cal, JIM_torque_cal = load_mat(file_path_JIM_cal)
-        JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM)
+        JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM, file_path_JIM_cal, False, True)
 
-        plt.scatter(JIM_angle, JIM_torque - JIM_torque_cal, label=f'Torque_cam_{i}', s=1)
+        plt.scatter(JIM_angle, JIM_torque, label=f'Torque_cam_{i}', s=1)
 
     plt.xlabel('Angle [deg]')
     plt.ylabel('Torque [N/m]')
@@ -149,4 +145,7 @@ file_path_JIM_cal = r"I:\My Drive\Neurobionics\ExoBoot\cam_torque_angle\CAL_long
 file_path_JIM = r"I:\My Drive\Neurobionics\ExoBoot\cam_torque_angle\EXO_long_slowsinewithpad001.mat"
 
 JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM, file_path_JIM_cal, False, False)
-fft(JIM_time,JIM_torque)
+JIM_time_lpf, JIM_angle_lpf, JIM_torque_lpf = load_mat(file_path_JIM, file_path_JIM_cal, False, True)
+
+# plot_torque_data(JIM_angle, JIM_torque, JIM_angle_lpf, JIM_torque_lpf)
+plot_cam_data()
