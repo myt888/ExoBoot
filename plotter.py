@@ -129,8 +129,7 @@ def plot_torque_data(angle_1, torque_1, angle_2 = None, torque_2 = None):
 
 def plot_cam_data(fit = None):
     plt.figure(figsize=(10, 8))
-    all_angle = []
-    all_torque = []
+    all_angle, all_torque = [], []
 
     for i in range(1, 6):
         file_index = f"{i:03d}"  # Formats the index as 3 digits with leading zeros
@@ -146,25 +145,26 @@ def plot_cam_data(fit = None):
         all_torque.extend(JIM_torque)
         all_angle_array = np.array(all_angle)
     
-    if fit == 1:
-        m, b = np.polyfit(all_angle, all_torque, 1)
-        all_torque_fit = m * all_angle_array + b
-        plt.plot(all_angle_array, all_torque_fit, label=f'1st Order Fit: m={m:.3f}, b={b:.3f}', color='red')
-        print(f'y = {m:.3f}x + {b:.3f}')
-    
-    elif fit == 2:
-        a, b, c = np.polyfit(all_angle, all_torque, 2)
-        all_torque_fit = a * all_angle_array**2 + b * all_angle_array + c
-        plt.plot(all_angle_array, all_torque_fit, label=f'2nd Order Fit: a={a:.3f}, b={b:.3f}, c={c:.3f}', color='red')
-        print(f'y = {a:.3f}x^2 + {b:.3f}x + {c:.3f}')
+    if fit is not None:
+        if fit == 1:
+            m, b = np.polyfit(all_angle, all_torque, 1)
+            all_torque_fit = m * all_angle_array + b
+            plt.plot(all_angle_array, all_torque_fit, label=f'1st Order Fit: m={m:.3f}, b={b:.3f}', color='red')
+            print(f'y = {m:.3f}x + {b:.3f}')
+        
+        elif fit == 2:
+            a, b, c = np.polyfit(all_angle, all_torque, 2)
+            all_torque_fit = a * all_angle_array**2 + b * all_angle_array + c
+            plt.plot(all_angle_array, all_torque_fit, label=f'2nd Order Fit: a={a:.3f}, b={b:.3f}, c={c:.3f}', color='red')
+            print(f'y = {a:.3f}x^2 + {b:.3f}x + {c:.3f}')
 
-    elif fit == 3:
-        a, b, c, d = np.polyfit(all_angle, all_torque, 3)
-        all_torque_fit = a * all_angle_array**3 + b * all_angle_array**2 + c * all_angle_array + d
-        plt.plot(all_angle_array, all_torque_fit, label=f'3rd Order Fit: a={a:.3f}, b={b:.3f}, c={c:.3f}, d={d:.3f}', color='red')
-        print(f'y = {a:.3f}x^3 + {b:.3f}x^2 + {c:.3f}x + {d:.3f}')
+        elif fit == 3:
+            a, b, c, d = np.polyfit(all_angle, all_torque, 3)
+            all_torque_fit = a * all_angle_array**3 + b * all_angle_array**2 + c * all_angle_array + d
+            plt.plot(all_angle_array, all_torque_fit, label=f'3rd Order Fit: a={a:.3f}, b={b:.3f}, c={c:.3f}, d={d:.3f}', color='red')
+            print(f'y = {a:.3f}x^3 + {b:.3f}x^2 + {c:.3f}x + {d:.3f}')
 
-    calculate_fit_quality(all_torque, all_torque_fit, fit)
+        calculate_fit_quality(all_torque, all_torque_fit, fit)
 
     plt.xlabel('Angle [deg]')
     plt.ylabel('Torque [N/m]')
