@@ -42,11 +42,11 @@ def butter_lowpass_filter(data, cutoff, fs, order):
     return y
 
 
-def calculate_fit_quality(y, y_fit, order):
+def calculate_fit_quality(y, y_fit):
     r2 = r2_score(y, y_fit)
     rmse = np.sqrt(mean_squared_error(y, y_fit))
 
-    print(f"Order {order} Fit: R² = {r2:.3f}, RMSE = {rmse:.3f}")
+    print(f"Fit Quality: R² = {r2:.3f}, RMSE = {rmse:.3f}")
 
 
 def load_csv(file_path, adjust = False):
@@ -103,6 +103,24 @@ def load_mat(file_path, calibration_path=None, adjust=False, lpf=False, cutoff=5
         return JIM_time, JIM_angle, JIM_torque
 
 
+def load_cam():
+    for i in range(1, 6):
+        all_angle, all_torque = [], []
+        file_index = f"{i:03d}"  # Formats the index as 3 digits with leading zeros
+
+        file_path_JIM_cal = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\CAL_long_slowsinewithpad{file_index}.mat"
+        file_path_JIM = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\EXO_long_slowsinewithpad{file_index}.mat"
+
+        JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM, file_path_JIM_cal, False, True)
+
+        # plt.scatter(JIM_angle, JIM_torque, label=f'Torque_cam_{i}', s=1)
+
+        all_angle.extend(JIM_angle)
+        all_torque.extend(JIM_torque)
+
+    all_angle = np.array(all_angle)
+    return all_angle, all_torque
+
 def plot_angle_data(encoder_time, encoder_angle, JIM_time = None, JIM_angle = None):
     plt.figure(figsize=(8, 6))
     plt.scatter(encoder_time, encoder_angle, label='Encoder Angle', color='blue', s=3)
@@ -128,49 +146,39 @@ def plot_torque_data(angle_1, torque_1, angle_2 = None, torque_2 = None):
     plt.show()
 
 def plot_cam_data(fit = None):
-    plt.figure(figsize=(10, 8))
-    all_angle, all_torque = [], []
-
-    for i in range(1, 6):
-        file_index = f"{i:03d}"  # Formats the index as 3 digits with leading zeros
-
-        file_path_JIM_cal = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\CAL_long_slowsinewithpad{file_index}.mat"
-        file_path_JIM = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\EXO_long_slowsinewithpad{file_index}.mat"
-
-        JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM, file_path_JIM_cal, False, True)
-
-        plt.scatter(JIM_angle, JIM_torque, label=f'Torque_cam_{i}', s=1)
-
-        all_angle.extend(JIM_angle)
-        all_torque.extend(JIM_torque)
-        all_angle_array = np.array(all_angle)
+    all_angle, all_torque = load_cam()
     
+    plt.figure(figsize=(10, 8))
+    plt.scatter(all_angle, all_torque, label=f'Torque_cam', s=1)
+
     if fit is not None:
         if fit == 1:
             m, b = np.polyfit(all_angle, all_torque, 1)
-            all_torque_fit = m * all_angle_array + b
-            plt.plot(all_angle_array, all_torque_fit, label=f'1st Order Fit: m={m:.3f}, b={b:.3f}', color='red')
+            all_torque_fit = m * all_angle + b
+            plt.plot(all_angle, all_torque_fit, label=f'1st Order Fit: m={m:.3f}, b={b:.3f}', color='red')
             print(f'y = {m:.3f}x + {b:.3f}')
         
         elif fit == 2:
             a, b, c = np.polyfit(all_angle, all_torque, 2)
-            all_torque_fit = a * all_angle_array**2 + b * all_angle_array + c
-            plt.plot(all_angle_array, all_torque_fit, label=f'2nd Order Fit: a={a:.3f}, b={b:.3f}, c={c:.3f}', color='red')
+            all_torque_fit = a * all_angle**2 + b * all_angle + c
+            plt.plot(all_angle, all_torque_fit, label=f'2nd Order Fit: a={a:.3f}, b={b:.3f}, c={c:.3f}', color='red')
             print(f'y = {a:.3f}x^2 + {b:.3f}x + {c:.3f}')
 
         elif fit == 3:
             a, b, c, d = np.polyfit(all_angle, all_torque, 3)
-            all_torque_fit = a * all_angle_array**3 + b * all_angle_array**2 + c * all_angle_array + d
-            plt.plot(all_angle_array, all_torque_fit, label=f'3rd Order Fit: a={a:.3f}, b={b:.3f}, c={c:.3f}, d={d:.3f}', color='red')
+            all_torque_fit = a * all_angle**3 + b * all_angle**2 + c * all_angle + d
+            plt.plot(all_angle, all_torque_fit, label=f'3rd Order Fit: a={a:.3f}, b={b:.3f}, c={c:.3f}, d={d:.3f}', color='red')
             print(f'y = {a:.3f}x^3 + {b:.3f}x^2 + {c:.3f}x + {d:.3f}')
 
-        calculate_fit_quality(all_torque, all_torque_fit, fit)
+        calculate_fit_quality(all_torque, all_torque_fit)
 
     plt.xlabel('Angle [deg]')
     plt.ylabel('Torque [N/m]')
     plt.grid(True)
     plt.legend()
     plt.show()
+
+
 
 
 #Load Files
@@ -182,4 +190,4 @@ JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM, file_path_JIM_cal, Fal
 JIM_time_lpf, JIM_angle_lpf, JIM_torque_lpf = load_mat(file_path_JIM, file_path_JIM_cal, False, True)
 
 # plot_torque_data(JIM_angle, JIM_torque, JIM_angle_lpf, JIM_torque_lpf)
-plot_cam_data(2)
+plot_cam_data(1)
