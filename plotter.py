@@ -133,8 +133,8 @@ def load_mat(file_path, calibration_path=None, adjust=False, lpf=False, cutoff=5
 
     if calibration_path:
         calibration_data = scipy.io.loadmat(calibration_path)
-        calibration_time = calibration_data['output'][:,0]
-        calibration_angle = np.degrees(calibration_data['output'][:,1])
+        # calibration_time = calibration_data['output'][:,0]
+        # calibration_angle = np.degrees(calibration_data['output'][:,1])
         calibration_torque = calibration_data['output'][:,2]
         if len(calibration_torque) == len(JIM_torque):
             JIM_torque -= calibration_torque
@@ -154,8 +154,10 @@ def load_cam():
         all_angle, all_torque = [], []
         file_index = f"{i:03d}"  # Formats the index as 3 digits with leading zeros
 
-        file_path_JIM_cal = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\CAL_long_slowsinewithpad{file_index}.mat"
-        file_path_JIM = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\EXO_long_slowsinewithpad{file_index}.mat"
+        # file_path_JIM_cal = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\CAL_long_slowsinewithpad{file_index}.mat"
+        # file_path_JIM = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\EXO_long_slowsinewithpad{file_index}.mat"
+        file_path_JIM_cal = f"ExoBoot/cam_torque_angle/CAL_long_slowsinewithpad{file_index}.mat"
+        file_path_JIM = f"ExoBoot/cam_torque_angle/EXO_long_slowsinewithpad{file_index}.mat"
 
         JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM, file_path_JIM_cal, False, True)
 
@@ -219,7 +221,7 @@ def plot_cam_data(fit = None):
 
 
 def plot_piecewise_fit(x_data, y_data):
-    breakpoints = np.linspace(-20, 10, 100)
+    breakpoints = np.linspace(-20, 10, 300)
     best_fit_quality = float('inf')
     best_fit_func = None
     best_breakpoint = None
@@ -239,6 +241,7 @@ def plot_piecewise_fit(x_data, y_data):
     calculate_fit_quality(y_data, best_fit_func(x_data))
     print_piecewise_equations(best_params_logistic, best_params_poly, best_breakpoint)
 
+    plt.figure(figsize=(10, 8))
     plt.scatter(x_data, y_data, label='Cam_Torque', s=1)
     plt.plot(x_data, best_fit_func(x_data), label='Best Piecewise Fit', color='red')
     plt.axvline(x=best_breakpoint, color='green', linestyle='--', label='Breakpoint')
