@@ -53,15 +53,16 @@ def load_mat(file_path, calibration_path=None, adjust=False, lpf=False, cutoff=5
 
     if adjust:
         adjusted_time, adjusted_angle = proc.adjusted_data(JIM_time, JIM_angle, 100, 0.05)
-        return adjusted_time, adjusted_angle, JIM_torque
+        return adjusted_time, adjusted_angle
     else:
         return JIM_time, JIM_angle, JIM_torque
 
 
 def load_cam():
+    all_angle, all_torque = [], []
+
     for i in range(1, 6):
-        all_angle, all_torque = [], []
-        file_index = f"{i:03d}"  # Formats the index as 3 digits with leading zeros
+        file_index = f"{i:03d}"
 
         # file_path_JIM_cal = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\CAL_long_slowsinewithpad{file_index}.mat"
         # file_path_JIM = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\EXO_long_slowsinewithpad{file_index}.mat"
@@ -71,13 +72,13 @@ def load_cam():
         JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM, file_path_JIM_cal, False, True)
 
         # plt.scatter(JIM_angle, JIM_torque, label=f'Torque_cam_{i}', s=1)
-
-        all_angle.append(JIM_angle)
-        all_torque.append(JIM_torque)
+        print(len(JIM_torque))
+        all_angle.extend(JIM_angle)
+        all_torque.extend(JIM_torque)
 
     all_angle = np.array(all_angle)
     all_torque = np.array(all_torque)
-
+    print(len(all_torque))
     return all_angle, all_torque
 
 
@@ -162,5 +163,4 @@ def plot_piecewise_fit():
     plt.show()
 
 
-# plot_piecewise_fit()
-plot_cam_data()
+plot_piecewise_fit()
