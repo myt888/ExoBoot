@@ -72,13 +72,11 @@ def load_cam():
         JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM, file_path_JIM_cal, False, True)
 
         # plt.scatter(JIM_angle, JIM_torque, label=f'Torque_cam_{i}', s=1)
-        print(len(JIM_torque))
         all_angle.extend(JIM_angle)
         all_torque.extend(JIM_torque)
 
     all_angle = np.array(all_angle)
     all_torque = np.array(all_torque)
-    print(len(all_torque))
     return all_angle, all_torque
 
 
