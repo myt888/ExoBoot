@@ -1,6 +1,3 @@
-
-import csv
-import scipy.io
 import numpy as np
 from scipy.signal import butter, filtfilt
 from scipy.optimize import curve_fit
