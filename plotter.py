@@ -1,6 +1,7 @@
 import csv
 import scipy.io
 from scipy.signal import butter, filtfilt
+from scipy.optimize import curve_fit
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score, mean_squared_error
@@ -40,6 +41,51 @@ def butter_lowpass_filter(data, cutoff, fs, order):
     b, a = butter(order, normal_cutoff, btype='low', analog=False)
     y = filtfilt(b, a, data)
     return y
+
+
+def logistic_function(x, L, k, x0):
+    z = -k * (x - x0)
+    z = np.clip(z, -100, 100)
+    return L / (1 + np.exp(z))
+
+
+def polynomial_function(x, a, b, c):
+    return a * x**2 + b * x + c
+
+
+def try_piecewise_fit(x_data, y_data, breakpoint):
+    mask = x_data < breakpoint
+    
+    x_data_logistic = x_data[mask]
+    y_data_logistic = y_data[mask]
+
+    x_data_poly = x_data[~mask]
+    y_data_poly = y_data[~mask]
+    
+    try:
+        popt_logistic, _ = curve_fit(logistic_function, x_data_logistic, y_data_logistic)
+        popt_poly, _ = curve_fit(polynomial_function, x_data_poly, y_data_poly)
+    except RuntimeError:
+        return None
+
+    def piecewise_fit(x):
+        return np.piecewise(x, [x < breakpoint], 
+                            [lambda x: logistic_function(x, *popt_logistic), 
+                             lambda x: polynomial_function(x, *popt_poly)])
+    
+    return piecewise_fit, popt_logistic, popt_poly
+
+
+def print_piecewise_equations(popt_logistic, popt_poly, breakpoint):
+    L, k, x0 = popt_logistic
+    a, b, c = popt_poly
+
+    logistic_eq = f"Logistic Equation: y = {L:.3f} / (1 + exp(-{k:.3f} * (x - {x0:.3f})))"
+    polynomial_eq = f"Polynomial Equation: y = {a:.3f}x^2 + {b:.3f}x + {c:.3f}"
+
+    print(logistic_eq)
+    print(polynomial_eq)
+    print(f"Breakpoint: x = {breakpoint:.3f}")
 
 
 def calculate_fit_quality(y, y_fit):
@@ -119,7 +165,10 @@ def load_cam():
         all_torque.extend(JIM_torque)
 
     all_angle = np.array(all_angle)
+    all_torque = np.array(all_torque)
+
     return all_angle, all_torque
+
 
 def plot_angle_data(encoder_time, encoder_angle, JIM_time = None, JIM_angle = None):
     plt.figure(figsize=(8, 6))
@@ -134,20 +183,10 @@ def plot_angle_data(encoder_time, encoder_angle, JIM_time = None, JIM_angle = No
     plt.legend()
     plt.show()
 
-def plot_torque_data(angle_1, torque_1, angle_2 = None, torque_2 = None):
-    plt.figure(figsize=(8, 6))
-    plt.scatter(angle_1, torque_1, label='Torque_cam', color='Black', s=1)
-    if angle_2 is not None and torque_2 is not None:
-        plt.scatter(angle_2, torque_2, label='Torque_cam_filtered', color='Red', s=1)
-    plt.xlabel('Angle')
-    plt.ylabel('Torque')
-    plt.grid(True)
-    plt.legend()
-    plt.show()
 
 def plot_cam_data(fit = None):
     all_angle, all_torque = load_cam()
-    
+
     plt.figure(figsize=(10, 8))
     plt.scatter(all_angle, all_torque, label=f'Torque_cam', s=1)
 
@@ -179,15 +218,36 @@ def plot_cam_data(fit = None):
     plt.show()
 
 
+def plot_piecewise_fit(x_data, y_data):
+    breakpoints = np.linspace(-20, 10, 100)
+    best_fit_quality = float('inf')
+    best_fit_func = None
+    best_breakpoint = None
+    best_params_logistic = best_params_poly = None
+
+    for bp in breakpoints:
+        fit_func, params_logistic, params_poly = try_piecewise_fit(x_data, y_data, bp)
+        if fit_func is not None:
+            fit_quality = np.sum((y_data - fit_func(x_data))**2)
+            if fit_quality < best_fit_quality:
+                best_fit_quality = fit_quality
+                best_fit_func = fit_func
+                best_breakpoint = bp
+                best_params_logistic = params_logistic
+                best_params_poly = params_poly
+
+    calculate_fit_quality(y_data, best_fit_func(x_data))
+    print_piecewise_equations(best_params_logistic, best_params_poly, best_breakpoint)
+
+    plt.scatter(x_data, y_data, label='Cam_Torque', s=1)
+    plt.plot(x_data, best_fit_func(x_data), label='Best Piecewise Fit', color='red')
+    plt.axvline(x=best_breakpoint, color='green', linestyle='--', label='Breakpoint')
+    plt.xlabel('Angle [deg]')
+    plt.ylabel('Torque [N/m]')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
 
 
-#Load Files
-file_path_encoder = r"I:\My Drive\Neurobionics\ExoBoot\data\encoder_check_test_1.csv"
-file_path_JIM_cal = r"I:\My Drive\Neurobionics\ExoBoot\cam_torque_angle\CAL_long_slowsinewithpad001.mat"
-file_path_JIM = r"I:\My Drive\Neurobionics\ExoBoot\cam_torque_angle\EXO_long_slowsinewithpad001.mat"
-
-JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM, file_path_JIM_cal, False, False)
-JIM_time_lpf, JIM_angle_lpf, JIM_torque_lpf = load_mat(file_path_JIM, file_path_JIM_cal, False, True)
-
-# plot_torque_data(JIM_angle, JIM_torque, JIM_angle_lpf, JIM_torque_lpf)
-plot_cam_data(1)
+x, y = load_cam()
+plot_piecewise_fit(x, y)
