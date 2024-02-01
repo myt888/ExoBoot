@@ -7,12 +7,12 @@ from scipy.optimize import curve_fit
 from sklearn.metrics import r2_score, mean_squared_error
 
 
-def adjusted_data(time, angle, initial_average_range, threshold):
-    initial_value = np.mean(angle[:initial_average_range])
-    start_index = next((i for i, angle in enumerate(angle) if abs(angle - initial_value) > threshold), None)
+def adjusted_data(x, y, initial_average_range, threshold):
+    initial_value = np.mean(y[:initial_average_range])
+    start_index = next((i for i, j in enumerate(y) if abs(j - initial_value) > threshold), None)
 
-    adjusted_time = [t - time[start_index] for t in time[start_index:]]
-    adjusted_angle = angle[start_index:]
+    adjusted_time = [t - x[start_index] for t in x[start_index:]]
+    adjusted_angle = y[start_index:]
     return adjusted_time, adjusted_angle
 
 
@@ -23,6 +23,7 @@ def fft(time, data):
     data_fft = np.fft.fft(data)
     freqs = np.fft.fftfreq(n, 1/fs)
 
+    return data_fft, freqs
     # plt.figure()
     # plt.plot(freqs[:n // 2], np.abs(data_fft)[:n // 2] * 1 / n)
     # plt.title('FFT')
