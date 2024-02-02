@@ -13,7 +13,7 @@ def load_csv(file_path, adjust = False):
         time = []
 
         for row in reader:
-            if float(row[2]) != 0:
+            if float(row[2]) != 0 and float(row[2]) <= 1000:
                 #iterations.append(int(row[0]))
                 time.append(float(row[1]))
                 ankle_angle.append(float(row[2]))
@@ -64,10 +64,10 @@ def load_cam():
     for i in range(1, 6):
         file_index = f"{i:03d}"
 
-        # file_path_JIM_cal = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\CAL_long_slowsinewithpad{file_index}.mat"
-        # file_path_JIM = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\EXO_long_slowsinewithpad{file_index}.mat"
-        file_path_JIM_cal = f"ExoBoot/cam_torque_angle/CAL_long_slowsinewithpad{file_index}.mat"
-        file_path_JIM = f"ExoBoot/cam_torque_angle/EXO_long_slowsinewithpad{file_index}.mat"
+        file_path_JIM_cal = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\CAL_long_slowsinewithpad{file_index}.mat"
+        file_path_JIM = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\EXO_long_slowsinewithpad{file_index}.mat"
+        # file_path_JIM_cal = f"ExoBoot/cam_torque_angle/CAL_long_slowsinewithpad{file_index}.mat"
+        # file_path_JIM = f"ExoBoot/cam_torque_angle/EXO_long_slowsinewithpad{file_index}.mat"
 
         JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM, file_path_JIM_cal, False, True)
 

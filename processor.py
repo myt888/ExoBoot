@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.signal import butter, filtfilt
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit, minimize
 from sklearn.metrics import r2_score, mean_squared_error
 
 
@@ -61,12 +61,9 @@ def try_piecewise_fit(x_data, y_data, breakpoint):
 
     x_data_poly = x_data[~mask]
     y_data_poly = y_data[~mask]
-    
-    try:
-        popt_logistic, _ = curve_fit(logistic_function, x_data_logistic, y_data_logistic)
-        popt_poly, _ = curve_fit(polynomial_function, x_data_poly, y_data_poly)
-    except RuntimeError:
-        return None
+
+    popt_logistic, _ = curve_fit(logistic_function, x_data_logistic, y_data_logistic)
+    popt_poly, _ = curve_fit(polynomial_function, x_data_poly, y_data_poly)
 
     def piecewise_fit(x):
         return np.piecewise(x, [x < breakpoint], 
@@ -74,10 +71,10 @@ def try_piecewise_fit(x_data, y_data, breakpoint):
                              lambda x: polynomial_function(x, *popt_poly)])
     
     return piecewise_fit, popt_logistic, popt_poly
-
+    
 
 def print_piecewise_equations(popt_logistic, popt_poly, breakpoint):
-    L, k, x0 = popt_logistic
+    L, k, x0 = popt_logistic    
     a, b, c = popt_poly
 
     logistic_eq = f"Logistic Equation: y = {L:.3f} / (1 + exp(-{k:.3f} * (x - {x0:.3f})))"
@@ -85,4 +82,4 @@ def print_piecewise_equations(popt_logistic, popt_poly, breakpoint):
 
     print(logistic_eq)
     print(polynomial_eq)
-    print(f"Breakpoint: x = {breakpoint:.3f}")
+    print(f"Breakpoint: x = {breakpoint:.3f}")  
