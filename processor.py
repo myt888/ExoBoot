@@ -88,13 +88,10 @@ def piecewise_fit(x_data, y_data):
 
         return ssr + 1000 * continuity_penalty
 
-    # Initial guesses: [L, k, x0, a, b, c, breakpoint]
     initial_params = [1, 1, np.median(x_data), 1, 1, 1, np.median(x_data)] 
-
     bounds = [(-np.inf, np.inf), (-np.inf, np.inf), (-np.inf, np.inf), 
               (-np.inf, np.inf), (-np.inf, np.inf), (-np.inf, np.inf), 
               (min(x_data), max(x_data))]
-
     result = minimize(objective, initial_params, method='L-BFGS-B', bounds=bounds)
 
     if result.success:
