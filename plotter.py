@@ -128,24 +128,41 @@ def plot_cam_data(fit = None):
     plt.show()
 
 
+# def plot_piecewise_fit():
+#     x_data, y_data = load_cam()
+#     breakpoints = np.linspace(-20, 10, 300)
+#     best_fit_quality = float('inf')
+#     best_fit_func = None
+#     best_breakpoint = None
+#     best_params_logistic = best_params_poly = None
+
+#     for bp in breakpoints:
+#         fit_func, params_logistic, params_poly = proc.try_piecewise_fit(x_data, y_data, bp)
+#         if fit_func is not None:
+#             fit_quality = np.sum((y_data - fit_func(x_data))**2)
+#             if fit_quality < best_fit_quality:
+#                 best_fit_quality = fit_quality
+#                 best_fit_func = fit_func
+#                 best_breakpoint = bp
+#                 best_params_logistic = params_logistic
+#                 best_params_poly = params_poly
+
+#     proc.calculate_fit_quality(y_data, best_fit_func(x_data))
+#     proc.print_piecewise_equations(best_params_logistic, best_params_poly, best_breakpoint)
+
+#     plt.figure(figsize=(10, 8))
+#     plt.scatter(x_data, y_data, label='Cam_Torque', s=1)
+#     plt.plot(x_data, best_fit_func(x_data), label='Best Piecewise Fit', color='red')
+#     plt.axvline(x=best_breakpoint, color='green', linestyle='--', label='Breakpoint')
+#     plt.xlabel('Angle [deg]')
+#     plt.ylabel('Torque [N/m]')
+#     plt.grid(True)
+#     plt.legend()
+#     plt.show()
+
 def plot_piecewise_fit():
     x_data, y_data = load_cam()
-    breakpoints = np.linspace(-20, 10, 300)
-    best_fit_quality = float('inf')
-    best_fit_func = None
-    best_breakpoint = None
-    best_params_logistic = best_params_poly = None
-
-    for bp in breakpoints:
-        fit_func, params_logistic, params_poly = proc.try_piecewise_fit(x_data, y_data, bp)
-        if fit_func is not None:
-            fit_quality = np.sum((y_data - fit_func(x_data))**2)
-            if fit_quality < best_fit_quality:
-                best_fit_quality = fit_quality
-                best_fit_func = fit_func
-                best_breakpoint = bp
-                best_params_logistic = params_logistic
-                best_params_poly = params_poly
+    best_fit_func, best_params_logistic, best_params_poly, best_breakpoint = proc.piecewise_fit(x_data, y_data)  
 
     proc.calculate_fit_quality(y_data, best_fit_func(x_data))
     proc.print_piecewise_equations(best_params_logistic, best_params_poly, best_breakpoint)
@@ -159,6 +176,5 @@ def plot_piecewise_fit():
     plt.grid(True)
     plt.legend()
     plt.show()
-
 
 plot_piecewise_fit()
