@@ -44,6 +44,10 @@ def logistic_function(x, L, k, x0):
     return L / (1 + np.exp(z))
 def polynomial_function(x, a, b, c):
     return a * x**2 + b * x + c
+def piecewise_function(x, logistic_params, poly_params, breakpoint):
+    return np.piecewise(x, [x < breakpoint], 
+                        [lambda x: logistic_function(x, *logistic_params),
+                         lambda x: polynomial_function(x, *poly_params)])
 
 
 def calculate_fit_quality(y, y_fit):
@@ -53,25 +57,6 @@ def calculate_fit_quality(y, y_fit):
     print(f"Fit Quality: R² = {r2:.3f}, RMSE = {rmse:.3f}")
 
 
-# def try_piecewise_fit(x_data, y_data, breakpoint):
-#     mask = x_data < breakpoint
-    
-#     x_data_logistic = x_data[mask]
-#     y_data_logistic = y_data[mask]
-
-#     x_data_poly = x_data[~mask]
-#     y_data_poly = y_data[~mask]
-
-#     popt_logistic, _ = curve_fit(logistic_function, x_data_logistic, y_data_logistic)
-#     popt_poly, _ = curve_fit(polynomial_function, x_data_poly, y_data_poly)
-
-#     def piecewise_fit(x):
-#         return np.piecewise(x, [x < breakpoint], 
-#                             [lambda x: logistic_function(x, *popt_logistic), 
-#                              lambda x: polynomial_function(x, *popt_poly)])
-    
-#     return piecewise_fit, popt_logistic, popt_poly
-    
 def piecewise_fit(x_data, y_data):
     def objective(params):
         L, k, x0, a, b, c, breakpoint = params
@@ -85,26 +70,20 @@ def piecewise_fit(x_data, y_data):
         
         ssr = np.sum(residuals_1**2) + np.sum(residuals_2**2)
         continuity_penalty = (logistic_function(breakpoint, L, k, x0) - polynomial_function(breakpoint, a, b, c))**2
+        return ssr + 1100 * continuity_penalty
 
-        return ssr + 1000 * continuity_penalty
-
-    initial_params = [1, 1, np.median(x_data), 1, 1, 1, np.median(x_data)] 
+    initial_params = [1, 1, np.median(x_data), 1, 1, 1, np.median(x_data)]  # L, k, x0, a, b, c, breakpoint
     bounds = [(-np.inf, np.inf), (-np.inf, np.inf), (-np.inf, np.inf), 
               (-np.inf, np.inf), (-np.inf, np.inf), (-np.inf, np.inf), 
               (min(x_data), max(x_data))]
     result = minimize(objective, initial_params, method='L-BFGS-B', bounds=bounds)
 
     if result.success:
-        fit_logistic_params = result.x[:3]  # L, k, x0
-        fit_poly_params = result.x[3:6] # a, b, c
+        fit_logistic_params = result.x[:3]
+        fit_poly_params = result.x[3:6]
         fit_breakpoint = result.x[6]
-
-        def piecewise_function(x):
-            return np.piecewise(x, [x < fit_breakpoint], 
-                                [lambda x: logistic_function(x, *fit_logistic_params),  # Logistic part
-                                 lambda x: polynomial_function(x, *fit_poly_params)])
-        
-        return piecewise_function, fit_logistic_params, fit_poly_params, fit_breakpoint
+        fit_function = (lambda x: piecewise_function(x, fit_logistic_params, fit_poly_params, fit_breakpoint))
+        return fit_function, fit_logistic_params, fit_poly_params, fit_breakpoint
     else:
         print("Optimization failed:", result.message)
         return None

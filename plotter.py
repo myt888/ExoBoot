@@ -1,5 +1,7 @@
 import csv
+import os
 import scipy.io
+import pandas as pd
 import processor as proc
 import numpy as np
 import matplotlib.pyplot as plt
@@ -35,15 +37,12 @@ def load_csv(file_path, adjust = False):
 
 def load_mat(file_path, calibration_path=None, adjust=False, lpf=False, cutoff=5, fs=100, order=5):
     mat_data = scipy.io.loadmat(file_path)
-
     JIM_time = mat_data['output'][:,0]
     JIM_angle = np.degrees(mat_data['output'][:,1])
     JIM_torque = mat_data['output'][:,2]
 
     if calibration_path:
         calibration_data = scipy.io.loadmat(calibration_path)
-        # calibration_time = calibration_data['output'][:,0]
-        # calibration_angle = np.degrees(calibration_data['output'][:,1])
         calibration_torque = calibration_data['output'][:,2]
         if len(calibration_torque) == len(JIM_torque):
             JIM_torque -= calibration_torque
@@ -64,10 +63,8 @@ def load_cam():
     for i in range(1, 6):
         file_index = f"{i:03d}"
 
-        file_path_JIM_cal = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\CAL_long_slowsinewithpad{file_index}.mat"
-        file_path_JIM = f"I:\\My Drive\\Neurobionics\\ExoBoot\\cam_torque_angle\\EXO_long_slowsinewithpad{file_index}.mat"
-        # file_path_JIM_cal = f"ExoBoot/cam_torque_angle/CAL_long_slowsinewithpad{file_index}.mat"
-        # file_path_JIM = f"ExoBoot/cam_torque_angle/EXO_long_slowsinewithpad{file_index}.mat"
+        file_path_JIM_cal = f"ExoBoot\\cam_torque_angle\\CAL_long_slowsinewithpad{file_index}.mat"
+        file_path_JIM = f"ExoBoot\\cam_torque_angle\\EXO_long_slowsinewithpad{file_index}.mat"
 
         JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM, file_path_JIM_cal, False, True)
 
@@ -77,7 +74,14 @@ def load_cam():
 
     all_angle = np.array(all_angle)
     all_torque = np.array(all_torque)
-    return all_angle, all_torque
+
+    file_path_csv = "ExoBoot\\cam_torque_angle\\cam_torque_data.csv"
+    if not os.path.exists(file_path_csv):
+        os.makedirs(os.path.dirname(file_path_csv), exist_ok=True)
+        data = pd.DataFrame({'Angle': all_angle, 'Torque': all_torque})
+        data.to_csv(file_path_csv, index=False)
+    else:
+        print(f"The file {file_path_csv} already exists.")
 
 
 def plot_angle_data(encoder_time, encoder_angle, JIM_time = None, JIM_angle = None):
@@ -128,40 +132,12 @@ def plot_cam_data(fit = None):
     plt.show()
 
 
-# def plot_piecewise_fit():
-#     x_data, y_data = load_cam()
-#     breakpoints = np.linspace(-20, 10, 300)
-#     best_fit_quality = float('inf')
-#     best_fit_func = None
-#     best_breakpoint = None
-#     best_params_logistic = best_params_poly = None
-
-#     for bp in breakpoints:
-#         fit_func, params_logistic, params_poly = proc.try_piecewise_fit(x_data, y_data, bp)
-#         if fit_func is not None:
-#             fit_quality = np.sum((y_data - fit_func(x_data))**2)
-#             if fit_quality < best_fit_quality:
-#                 best_fit_quality = fit_quality
-#                 best_fit_func = fit_func
-#                 best_breakpoint = bp
-#                 best_params_logistic = params_logistic
-#                 best_params_poly = params_poly
-
-#     proc.calculate_fit_quality(y_data, best_fit_func(x_data))
-#     proc.print_piecewise_equations(best_params_logistic, best_params_poly, best_breakpoint)
-
-#     plt.figure(figsize=(10, 8))
-#     plt.scatter(x_data, y_data, label='Cam_Torque', s=1)
-#     plt.plot(x_data, best_fit_func(x_data), label='Best Piecewise Fit', color='red')
-#     plt.axvline(x=best_breakpoint, color='green', linestyle='--', label='Breakpoint')
-#     plt.xlabel('Angle [deg]')
-#     plt.ylabel('Torque [N/m]')
-#     plt.grid(True)
-#     plt.legend()
-#     plt.show()
-
 def plot_piecewise_fit():
-    x_data, y_data = load_cam()
+    file_path_csv = "ExoBoot\\cam_torque_angle\\cam_torque_data.csv"
+    data = pd.read_csv(file_path_csv)
+    
+    x_data = data['Angle'].values
+    y_data = data['Torque'].values
     best_fit_func, best_params_logistic, best_params_poly, best_breakpoint = proc.piecewise_fit(x_data, y_data)  
 
     proc.calculate_fit_quality(y_data, best_fit_func(x_data))
@@ -177,4 +153,7 @@ def plot_piecewise_fit():
     plt.legend()
     plt.show()
 
-plot_piecewise_fit()
+
+if __name__ == '__main__':
+    plot_piecewise_fit()
+
