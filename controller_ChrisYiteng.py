@@ -7,14 +7,12 @@ import gc   # Memory leak clearance
 import sys
 import csv
 from time import sleep, time, strftime, perf_counter
-
-
+sys.path.append(r"/home/pi/MBLUE/ThermalCharacterization/logic_board_temp_cal/")
 from EB51Man import EB51Man  # Dephy Exoboot Manager
 from ActPackMan import _ActPackManStates 
 from StatProfiler import SSProfile
-
-sys.path.append(r"/home/pi/MBLUE/ThermalCharacterization/logic_board_temp_cal/")
 from thermal_model import ThermalMotorModel
+
 
 MAX_TORQUE = 30
 NM_PER_AMP = 0.146
