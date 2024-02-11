@@ -148,7 +148,7 @@ def plot_piecewise_fit():
     plt.plot(x_data, best_fit_func(x_data), label='Best Piecewise Fit', color='red')
     plt.axvline(x=best_breakpoint, color='green', linestyle='--', label='Breakpoint')
     plt.xlabel('Angle [deg]')
-    plt.ylabel('Torque [N/m]')
+    plt.ylabel('Torque [Nm]')
     plt.grid(True)
     plt.legend()
     plt.show()
