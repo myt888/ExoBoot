@@ -70,7 +70,7 @@ def piecewise_fit(x_data, y_data):
         
         ssr = np.sum(residuals_1**2) + np.sum(residuals_2**2)
         continuity_penalty = (logistic_function(breakpoint, L, k, x0) - polynomial_function(breakpoint, a, b, c))**2
-        return ssr + 1100 * continuity_penalty
+        return ssr + 1000 * continuity_penalty
 
     initial_params = [1, 1, np.median(x_data), 1, 1, 1, np.median(x_data)]  # L, k, x0, a, b, c, breakpoint
     bounds = [(-np.inf, np.inf), (-np.inf, np.inf), (-np.inf, np.inf), 
