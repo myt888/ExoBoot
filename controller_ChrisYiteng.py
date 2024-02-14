@@ -1,9 +1,11 @@
 from SoftRealtimeLoop import SoftRealtimeLoop   # Exit upon cntl+C (runs as infinite loop otherwise)
 import numpy as np   # Numerical python
+import json
 import math
 import pickle  # Document read/save (record foot sensor file)
 import os  # For document read/save (combined with pickle)
 import gc   # Memory leak clearance
+import processor as proc
 import sys
 import csv
 from time import sleep, time, strftime, perf_counter
@@ -18,6 +20,13 @@ MAX_TORQUE = 30
 NM_PER_AMP = 0.146
 
 ANKLE_LOG_VARS = ['iteration', 'time', 'commanded_torque', 'device current']
+
+
+def get_passive_torque(angle):
+    filename = f'ExoBoot\cam_torque_angle\piecewise_fit_params.json'
+    with open(filename, 'r') as file:
+        fit_results = json.load(file)
+    proc.piecewise_function()
 
 
 class Controller():
