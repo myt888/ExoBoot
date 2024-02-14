@@ -26,7 +26,13 @@ def get_passive_torque(angle):
     filename = f'ExoBoot\cam_torque_angle\piecewise_fit_params.json'
     with open(filename, 'r') as file:
         fit_results = json.load(file)
-    proc.piecewise_function()
+
+    logistic_params = (fit_results['L'], fit_results['k'], fit_results['x0'])
+    poly_params = (fit_results['a'], fit_results['b'], fit_results['c'])
+    breakpoint = fit_results['breakpoint']
+
+    passive_torque = proc.piecewise_function(angle, logistic_params, poly_params, breakpoint)
+    return passive_torque
 
 
 class Controller():
