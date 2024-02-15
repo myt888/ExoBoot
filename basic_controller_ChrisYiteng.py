@@ -71,12 +71,13 @@ class Controller():
             self.dev.update() # Update
 
             des_torque = -5
-            
-            current_angle = self.dev.get_output_angle_degrees # Absolute angle reading of the encoder
-            if -25 <= current_angle <= 18:
-                passive_torque = get_passive_torque(current_angle)
+            # JIM: Plantar +
+            # Encoder: Dorsi + (Convention)
+            current_angle = 92.5 - self.dev.get_output_angle_degrees # Initial angle set at 92.5
+            if -25 <= -current_angle <= 18:
+                passive_torque = get_passive_torque(-current_angle)
                 des_torque =- passive_torque
-            elif current_angle > 18:
+            elif -current_angle > 18:
                 passive_torque = get_passive_torque(18)
                 des_torque =- passive_torque
                 

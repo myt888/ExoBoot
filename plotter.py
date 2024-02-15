@@ -152,11 +152,12 @@ def plot_piecewise_fit():
     plt.show()
 
 
-encoder_file = "ExoBoot\\data\\encoder_check_test_2.csv"
-mat_file = "ExoBoot\\data\\encoder_check_test_2.mat"
+encoder_file = "ExoBoot/data/encoder_check_test_3.csv"
+mat_file = "ExoBoot/data/encoder_check_test_3.mat"
 
-encoder_time, encoder_angle = load_csv(encoder_file, True)
+encoder_time, encoder_angle = load_csv(encoder_file, False)
 JIM_time, JIM_angle =  load_mat(mat_file, None, True)
 if __name__ == '__main__':
-    plot_angle_data(encoder_time, encoder_angle, JIM_time, JIM_angle)
+    # plot_angle_data(encoder_time, encoder_angle, JIM_time, JIM_angle)
+    plot_angle_data(encoder_time, encoder_angle)
 
