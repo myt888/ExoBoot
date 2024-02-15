@@ -8,7 +8,7 @@ import gc   # Memory leak clearance
 import processor as proc
 import sys
 import csv
-from time import sleep, time, strftime, perf_counter
+import time
 sys.path.append(r"/home/pi/MBLUE/ThermalCharacterization/logic_board_temp_cal/")
 from EB51Man import EB51Man  # Dephy Exoboot Manager
 from ActPackMan import _ActPackManStates 
@@ -22,8 +22,8 @@ NM_PER_AMP = 0.146
 ANKLE_LOG_VARS = ['time', 'commanded_torque', 'passive_torque', 'ankle_angle', 'device_current']
 
 
-def get_passive_torque(angle):
-    filename = f'ExoBoot\cam_torque_angle\piecewise_fit_params.json'
+def get_passive_torque(angle):  # Using JIM angle convention
+    filename = f'/home/pi/ExoBoot/cam_torque_angle/piecewise_fit_params.json'
     with open(filename, 'r') as file:
         fit_results = json.load(file)
 
@@ -31,7 +31,7 @@ def get_passive_torque(angle):
     poly_params = (fit_results['a'], fit_results['b'], fit_results['c'])
     breakpoint = fit_results['breakpoint']
 
-    passive_torque = - proc.piecewise_function(angle, logistic_params, poly_params, breakpoint) # Negative for dorsiflexion
+    passive_torque = - proc.piecewise_function(angle, logistic_params, poly_params, breakpoint) # Positive for dorsiflexion torque
     return passive_torque
 
 
@@ -40,7 +40,7 @@ class Controller():
         self.dt = dt
         self.dev = dev
 
-        self.cf_name = '{0}_PEA_test_R.csv'.format(strftime("%Y%m%d-%H%M%S"))
+        self.cf_name = 'PEA_test_R_{0}.csv'.format(time.strftime("%Y%m%d-%H%M%S"))
         self.cf_path = os.path.join('/home/pi/ExoBoot/data', self.cf_name)
         self.cf = open(self.cf_path, 'w', encoding='UTF8', newline='')
         self.writer = csv.writer(self.cf)
@@ -70,17 +70,19 @@ class Controller():
             i = i + 1
             self.dev.update() # Update
 
+            passive_torque = 0
             des_torque = -5
             # JIM: Plantar +
             # Encoder: Dorsi + (Convention)
-            current_angle = 92.5 - self.dev.get_output_angle_degrees # Initial angle set at 92.5
-            if -25 <= -current_angle <= 18:
-                passive_torque = get_passive_torque(-current_angle)
-                des_torque =- passive_torque
-            elif -current_angle > 18:
+            encoder_angle = self.dev.get_output_angle_degrees()
+            current_angle = 92.5 - encoder_angle # Initial angle set at 92.5
+
+            if -25 <= current_angle <= 18:
+                passive_torque = get_passive_torque(current_angle)
+            elif current_angle > 18:
                 passive_torque = get_passive_torque(18)
-                des_torque =- passive_torque
-                
+
+            des_torque -= passive_torque
             self.dev.set_output_torque_newton_meters(des_torque)
 
             qaxis_curr = self.dev.get_current_qaxis_amps()
