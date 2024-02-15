@@ -29,7 +29,7 @@ def load_csv(file_path, adjust = False):
             # Trim the constant data points at the end
             end_value = np.mean(adjusted_angles[-1000:])
             end_index = next((len(adjusted_angles) - i for i, angle in enumerate(reversed(adjusted_angles), 1) if abs(angle - end_value) > 0.5), None) # Threshold is larger
-
+            print(f"initial angle = {initial_angle}")
             return adjusted_time[:end_index], adjusted_angles[:end_index]
         else:
             return time, ankle_angle
@@ -86,11 +86,9 @@ def load_cam():
 
 def plot_angle_data(encoder_time, encoder_angle, JIM_time = None, JIM_angle = None):
     plt.figure(figsize=(8, 6))
-    plt.scatter(encoder_time, encoder_angle, label='Encoder Angle', color='blue', s=3)
-
     if JIM_time is not None and JIM_angle is not None:
         plt.scatter(JIM_time, JIM_angle, label='JIM Angle', color='red', s=3)
-
+    plt.scatter(encoder_time, encoder_angle, label='Encoder Angle', color='blue', s=3)
     plt.xlabel('Time')
     plt.ylabel('Ankle Angle')
     plt.grid(True)
@@ -153,8 +151,12 @@ def plot_piecewise_fit():
     plt.legend()
     plt.show()
 
-encoder_file = "I:\\My Drive\\LocoMotor\\ExoBoot\\data\\encoder_check_test_5.csv"
-encoder_time, encoder_angle = load_csv(encoder_file, False)
+
+encoder_file = "ExoBoot\\data\\encoder_check_test_2.csv"
+mat_file = "ExoBoot\\data\\encoder_check_test_2.mat"
+
+encoder_time, encoder_angle = load_csv(encoder_file, True)
+JIM_time, JIM_angle =  load_mat(mat_file, None, True)
 if __name__ == '__main__':
-    plot_angle_data(encoder_time, encoder_angle)
+    plot_angle_data(encoder_time, encoder_angle, JIM_time, JIM_angle)
 
