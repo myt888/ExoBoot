@@ -19,7 +19,7 @@ from thermal_model import ThermalMotorModel
 MAX_TORQUE = 30
 NM_PER_AMP = 0.146
 
-ANKLE_LOG_VARS = ['iteration', 'time', 'commanded_torque', 'device current']
+ANKLE_LOG_VARS = ['time', 'commanded_torque', 'passive_torque', 'ankle_angle', 'device_current']
 
 
 def get_passive_torque(angle):
@@ -31,7 +31,7 @@ def get_passive_torque(angle):
     poly_params = (fit_results['a'], fit_results['b'], fit_results['c'])
     breakpoint = fit_results['breakpoint']
 
-    passive_torque = proc.piecewise_function(angle, logistic_params, poly_params, breakpoint)
+    passive_torque = - proc.piecewise_function(angle, logistic_params, poly_params, breakpoint) # Negative for dorsiflexion
     return passive_torque
 
 
@@ -43,7 +43,6 @@ class Controller():
         self.cf_name = '{0}_PEA_test_R.csv'.format(strftime("%Y%m%d-%H%M%S"))
         self.cf_path = os.path.join('/home/pi/ExoBoot/Data', self.cf_name)
         self.cf = open(self.cf_path, 'w', encoding='UTF8', newline='')
-        
         self.writer = csv.writer(self.cf)
 
     def __enter__(self):
@@ -55,12 +54,10 @@ class Controller():
         print("exiting")
 
     def control(self):
-
         # Write log header
         self.writer.writerow(ANKLE_LOG_VARS)
 
         self.dev.realign_calibration()
-
         self.dev.set_current_gains() 
 
         i = 0
@@ -70,23 +67,29 @@ class Controller():
         time.sleep(0.5)
         
         for t in loop: 
-
             i = i + 1
-			
-            # Update
-            self.dev.update()
+            self.dev.update() # Update
 
             des_torque = -5
+            
+            current_angle = self.dev.get_output_angle_degrees # Absolute angle reading of the encoder
+            if -25 <= current_angle <= 18:
+                passive_torque = get_passive_torque(current_angle)
+                des_torque =- passive_torque
+            elif current_angle > 18:
+                passive_torque = get_passive_torque(18)
+                des_torque =- passive_torque
+                
             self.dev.set_output_torque_newton_meters(des_torque)
 
             qaxis_curr = self.dev.get_current_qaxis_amps()
             
             if i >= 50:
                 i = 0
-                print("des torque", des_torque, " qaxis current ", qaxis_curr)
+                print("des torque = ", des_torque, ", qaxis current = ", qaxis_curr)
 
             t_curr = time.time() - t0 
-            self.writer.writerow([t_curr, des_torque, qaxis_curr])    
+            self.writer.writerow([t_curr, des_torque, passive_torque, current_angle, qaxis_curr])    
 
         print("Controller closed")  
 
