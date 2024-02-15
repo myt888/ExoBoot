@@ -73,7 +73,7 @@ class Controller():
             passive_torque = 0
             des_torque = -5
             # JIM: Plantar +
-            # Encoder: Dorsi + (Convention)
+            # Encoder: Plantar + (Convention)
             encoder_angle = self.dev.get_output_angle_degrees()
             current_angle = 92.5 - encoder_angle # Initial angle set at 92.5
 
