@@ -153,7 +153,7 @@ def plot_piecewise_fit():
     plt.legend()
     plt.show()
 
-encoder_file = "I:\\My Drive\\Neurobionics\\ExoBoot\\data\\encoder_check_test_5.csv"
+encoder_file = "I:\\My Drive\\LocoMotor\\ExoBoot\\data\\encoder_check_test_5.csv"
 encoder_time, encoder_angle = load_csv(encoder_file, False)
 if __name__ == '__main__':
     plot_angle_data(encoder_time, encoder_angle)
