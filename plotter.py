@@ -6,7 +6,7 @@ import processor as proc
 import numpy as np
 import matplotlib.pyplot as plt
 
-def load_csv(file_path, adjust = False):
+def load_encoder_csv(file_path, adjust = False):
     with open(file_path, mode='r') as file:
         reader = csv.reader(file)
 
@@ -151,17 +151,21 @@ def plot_piecewise_fit():
     plt.legend()
     plt.show()
 
-
+csv_file = "ExoBoot/data/basic_controller_motor_3.csv"
 cal_file = "ExoBoot/data/basic_controller_motor_CAL_3.mat"
 mat_file = "ExoBoot/data/basic_controller_motor_EXO_3.mat"
 
 _, JIM_angle, JIM_torque =  load_mat(mat_file, cal_file, False, False)
 _, JIM_angle_filt, JIM_torque_filt =  load_mat(mat_file, cal_file, False, True)
+controller_data = pd.read_csv(csv_file)
 
 if __name__ == '__main__':
     plt.figure(figsize=(8, 6))
-    plt.scatter(JIM_angle, JIM_torque, label='output torque', s=3)
-    plt.scatter(JIM_angle_filt, JIM_torque_filt, label='filtered', s=3)
+    # plt.scatter(JIM_angle, JIM_torque, label='output torque', s=3)
+    # plt.scatter(JIM_angle_filt, JIM_torque_filt, label='filtered', s=3)
+    plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"], label='command', s=3)
+    plt.scatter(controller_data["ankle_angle"], controller_data["passive_torque"], label='passive', s=3)
+    plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"] + controller_data["passive_torque"], label='output', s=3)
     plt.xlabel('Angle [deg]')
     plt.ylabel('Torque')
     plt.grid(True)
