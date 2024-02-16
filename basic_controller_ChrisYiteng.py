@@ -60,7 +60,7 @@ class Controller():
 
             # Encoder: Plantar - (Convention)
             encoder_angle = self.dev.get_output_angle_degrees()
-            current_angle = encoder_angle - 92.5  # Initial angle set at 92.5
+            current_angle = encoder_angle - 91  # Initial angle set at 91
 
             if -18 <= current_angle <= 25:
                 passive_torque = proc.get_passive_torque(current_angle)
