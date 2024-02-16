@@ -38,7 +38,7 @@ def load_csv(file_path, adjust = False):
 def load_mat(file_path, calibration_path=None, adjust=False, lpf=False, cutoff=5, fs=100, order=10):
     mat_data = scipy.io.loadmat(file_path)
     JIM_time = mat_data['output'][:,0]
-    JIM_angle = np.degrees(mat_data['output'][:,1])
+    JIM_angle = - np.degrees(mat_data['output'][:,1])   # Fix JIM angle data
     JIM_torque = mat_data['output'][:,2]
 
     if calibration_path:
@@ -152,11 +152,9 @@ def plot_piecewise_fit():
     plt.show()
 
 
-encoder_file = "ExoBoot/data/encoder_check_test_3.csv"
 cal_file = "ExoBoot/data/basic_controller_motor_CAL.mat"
 mat_file = "ExoBoot/data/basic_controller_motor_EXO.mat"
 
-encoder_time, encoder_angle = load_csv(encoder_file, False)
 _, JIM_angle, JIM_torque =  load_mat(mat_file, cal_file, False, False)
 _, JIM_angle_filt, JIM_torque_filt =  load_mat(mat_file, cal_file, False, True)
 
