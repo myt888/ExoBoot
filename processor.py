@@ -106,8 +106,8 @@ def print_piecewise_equations(logistic_params, poly_params, breakpoint):
 def get_passive_torque(angle):
     angle = np.asarray(angle, dtype=float)
 
-    # filename = f'/home/pi/ExoBoot/cam_torque_angle/piecewise_fit_params.json'
-    filename = 'I:\My Drive\Locomotor\ExoBoot\cam_torque_angle\piecewise_fit_params.json'
+    filename = f'/home/pi/ExoBoot/cam_torque_angle/piecewise_fit_params.json'
+    # filename = f'I:\My Drive\Locomotor\ExoBoot\cam_torque_angle\piecewise_fit_params.json'
     with open(filename, 'r') as file:
         fit_results = json.load(file)
 
