@@ -74,7 +74,7 @@ class Controller():
             
             if i >= 50:
                 i = 0
-                print("des torque = ", des_torque, ", passive_torque = ", passive_torque, ", qaxis current = ", qaxis_curr)
+                print("des torque = ", des_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
 
             t_curr = time.time() - t0 
             self.writer.writerow([t_curr, des_torque, passive_torque, current_angle, qaxis_curr])    
