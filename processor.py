@@ -1,4 +1,6 @@
+import json
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.signal import butter, filtfilt
 from scipy.optimize import curve_fit, minimize
 from sklearn.metrics import r2_score, mean_squared_error
@@ -45,7 +47,7 @@ def logistic_function(x, L, k, x0):
 def polynomial_function(x, a, b, c):
     return a * x**2 + b * x + c
 def piecewise_function(x, logistic_params, poly_params, breakpoint):
-    return np.piecewise(x, [x < breakpoint], 
+    return np.piecewise(x, [x > breakpoint], 
                         [lambda x: logistic_function(x, *logistic_params),
                          lambda x: polynomial_function(x, *poly_params)])
 
@@ -90,7 +92,7 @@ def piecewise_fit(x_data, y_data):
 
 
 def print_piecewise_equations(logistic_params, poly_params, breakpoint):
-    L, k, x0 = logistic_params    
+    L, k, x0 = logistic_params
     a, b, c = poly_params
 
     logistic_eq = f"Logistic Equation: y = {L:.3f} / (1 + exp(-{k:.3f} * (x - {x0:.3f})))"
@@ -99,3 +101,21 @@ def print_piecewise_equations(logistic_params, poly_params, breakpoint):
     print(logistic_eq)
     print(polynomial_eq)
     print(f"Breakpoint: x = {breakpoint:.3f}")  
+
+
+def get_passive_torque(angle):
+    angle = np.asarray(angle, dtype=float)
+
+    # filename = f'/home/pi/ExoBoot/cam_torque_angle/piecewise_fit_params.json'
+    filename = 'I:\My Drive\Locomotor\ExoBoot\cam_torque_angle\piecewise_fit_params.json'
+    with open(filename, 'r') as file:
+        fit_results = json.load(file)
+
+    logistic_params = (fit_results['L'], fit_results['k'], fit_results['x0'])
+    poly_params = (fit_results['a'], fit_results['b'], fit_results['c'])
+    breakpoint = fit_results['breakpoint']
+
+    fit_function = (lambda x: piecewise_function(x, logistic_params, poly_params, breakpoint))
+    passive_torque = - fit_function(angle) # Positive for dorsiflexion torque
+    # print_piecewise_equations(logistic_params,poly_params,breakpoint)
+    return passive_torque

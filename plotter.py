@@ -35,7 +35,7 @@ def load_csv(file_path, adjust = False):
             return time, ankle_angle
 
 
-def load_mat(file_path, calibration_path=None, adjust=False, lpf=False, cutoff=5, fs=100, order=5):
+def load_mat(file_path, calibration_path=None, adjust=False, lpf=False, cutoff=5, fs=100, order=10):
     mat_data = scipy.io.loadmat(file_path)
     JIM_time = mat_data['output'][:,0]
     JIM_angle = np.degrees(mat_data['output'][:,1])
@@ -153,11 +153,19 @@ def plot_piecewise_fit():
 
 
 encoder_file = "ExoBoot/data/encoder_check_test_3.csv"
-mat_file = "ExoBoot/data/encoder_check_test_3.mat"
+cal_file = "ExoBoot/data/basic_controller_motor_CAL.mat"
+mat_file = "ExoBoot/data/basic_controller_motor_EXO.mat"
 
 encoder_time, encoder_angle = load_csv(encoder_file, False)
-JIM_time, JIM_angle =  load_mat(mat_file, None, True)
-if __name__ == '__main__':
-    # plot_angle_data(encoder_time, encoder_angle, JIM_time, JIM_angle)
-    plot_angle_data(encoder_time, encoder_angle)
+_, JIM_angle, JIM_torque =  load_mat(mat_file, cal_file, False, False)
+_, JIM_angle_filt, JIM_torque_filt =  load_mat(mat_file, cal_file, False, True)
 
+if __name__ == '__main__':
+    plt.figure(figsize=(8, 6))
+    plt.scatter(JIM_angle, JIM_torque, label='output torque', s=3)
+    plt.scatter(JIM_angle_filt, JIM_torque_filt, label='filtered', s=3)
+    plt.xlabel('Angle [deg]')
+    plt.ylabel('Torque')
+    plt.grid(True)
+    plt.legend()
+    plt.show()

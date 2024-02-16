@@ -1,7 +1,5 @@
 from SoftRealtimeLoop import SoftRealtimeLoop   # Exit upon cntl+C (runs as infinite loop otherwise)
-import numpy as np   # Numerical python
-import json
-import math
+import numpy as np   # Numerical pythonimport math
 import pickle  # Document read/save (record foot sensor file)
 import os  # For document read/save (combined with pickle)
 import gc   # Memory leak clearance
@@ -20,19 +18,6 @@ MAX_TORQUE = 30
 NM_PER_AMP = 0.146
 
 ANKLE_LOG_VARS = ['time', 'commanded_torque', 'passive_torque', 'ankle_angle', 'device_current']
-
-
-def get_passive_torque(angle):  # Using JIM angle convention
-    filename = f'/home/pi/ExoBoot/cam_torque_angle/piecewise_fit_params.json'
-    with open(filename, 'r') as file:
-        fit_results = json.load(file)
-
-    logistic_params = (fit_results['L'], fit_results['k'], fit_results['x0'])
-    poly_params = (fit_results['a'], fit_results['b'], fit_results['c'])
-    breakpoint = fit_results['breakpoint']
-
-    passive_torque = - proc.piecewise_function(angle, logistic_params, poly_params, breakpoint) # Positive for dorsiflexion torque
-    return passive_torque
 
 
 class Controller():
@@ -68,19 +53,19 @@ class Controller():
         
         for t in loop: 
             i = i + 1
-            self.dev.update() # Update
+            self.dev.update()   # Update
 
             passive_torque = 0
             des_torque = -5 # Plantar -
-            # JIM: Plantar +
-            # Encoder: Dorsi + (Convention)
+
+            # Encoder: Plantar - (Convention)
             encoder_angle = self.dev.get_output_angle_degrees()
             current_angle = encoder_angle - 92.5  # Initial angle set at 92.5
 
-            if -25 <= -current_angle <= 18:
-                passive_torque = get_passive_torque(-current_angle)
-            elif -current_angle > 18:
-                passive_torque = get_passive_torque(18)
+            if -18 <= current_angle <= 25:
+                passive_torque = proc.get_passive_torque(current_angle)
+            elif current_angle < -18:
+                passive_torque = proc.get_passive_torque(-18)
 
             des_torque -= passive_torque
             self.dev.set_output_torque_newton_meters(des_torque)
@@ -89,7 +74,7 @@ class Controller():
             
             if i >= 50:
                 i = 0
-                print("des torque = ", des_torque, ", qaxis current = ", qaxis_curr)
+                print("des torque = ", des_torque, ", passive_torque = ", passive_torque, ", qaxis current = ", qaxis_curr)
 
             t_curr = time.time() - t0 
             self.writer.writerow([t_curr, des_torque, passive_torque, current_angle, qaxis_curr])    
