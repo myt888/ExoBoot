@@ -62,10 +62,10 @@ class Controller():
             encoder_angle = self.dev.get_output_angle_degrees()
             current_angle = encoder_angle - 90  # Initial angle set at 90
 
-            if -18 <= current_angle <= 25:
-                passive_torque = proc.get_passive_torque(current_angle)
-            elif current_angle < -18:
-                passive_torque = proc.get_passive_torque(-18)
+            # if -18 <= current_angle <= 25:
+            #     passive_torque = proc.get_passive_torque(current_angle)
+            # elif current_angle < -18:
+            #     passive_torque = proc.get_passive_torque(-18)
 
             des_torque -= passive_torque
             self.dev.set_output_torque_newton_meters(des_torque)
