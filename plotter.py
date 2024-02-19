@@ -4,9 +4,9 @@ import scipy.io
 import pandas as pd
 import processor as proc
 import numpy as np
-import matplotlib as mpl
 import matplotlib.pyplot as plt
-mpl.rcParams['savefig.directory'] = 'I:\\My Drive\\Locomotor\\ExoBoot\\plots'
+plt.rc('savefig', directory='ExoBoot\\plots')
+
 
 def load_encoder_csv(file_path, adjust = False):
     with open(file_path, mode='r') as file:
@@ -40,7 +40,7 @@ def load_encoder_csv(file_path, adjust = False):
 def load_mat(file_path, calibration_path=None, adjust=False, lpf=False, cutoff=2, fs=100, order=5):
     mat_data = scipy.io.loadmat(file_path)
     JIM_time = mat_data['output'][:,0]
-    JIM_angle = - np.degrees(mat_data['output'][:,1])   # Fix JIM angle data
+    JIM_angle = - np.degrees(mat_data['output'][:,1])   # Fix JIM angle dcdata
     JIM_torque = - mat_data['output'][:,2]  # Fix JIM torque data
 
     if calibration_path:
