@@ -4,7 +4,9 @@ import scipy.io
 import pandas as pd
 import processor as proc
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+mpl.rcParams['savefig.directory'] = 'I:\\My Drive\\Locomotor\\ExoBoot\\plots'
 
 def load_encoder_csv(file_path, adjust = False):
     with open(file_path, mode='r') as file:
@@ -35,15 +37,15 @@ def load_encoder_csv(file_path, adjust = False):
             return time, ankle_angle
 
 
-def load_mat(file_path, calibration_path=None, adjust=False, lpf=False, cutoff=5, fs=100, order=10):
+def load_mat(file_path, calibration_path=None, adjust=False, lpf=False, cutoff=2, fs=100, order=5):
     mat_data = scipy.io.loadmat(file_path)
     JIM_time = mat_data['output'][:,0]
     JIM_angle = - np.degrees(mat_data['output'][:,1])   # Fix JIM angle data
-    JIM_torque = mat_data['output'][:,2]
+    JIM_torque = - mat_data['output'][:,2]  # Fix JIM torque data
 
     if calibration_path:
         calibration_data = scipy.io.loadmat(calibration_path)
-        calibration_torque = calibration_data['output'][:,2]
+        calibration_torque = - calibration_data['output'][:,2]  
         if len(calibration_torque) == len(JIM_torque):
             JIM_torque -= calibration_torque
 
@@ -76,13 +78,15 @@ def load_cam():
     all_torque = np.array(all_torque)
 
     file_path_csv = "ExoBoot\\cam_torque_angle\\cam_torque_data.csv"
+
     if not os.path.exists(file_path_csv):
         os.makedirs(os.path.dirname(file_path_csv), exist_ok=True)
         data = pd.DataFrame({'Angle': all_angle, 'Torque': all_torque})
         data.to_csv(file_path_csv, index=False)
-    else:
-        print(f"The file {file_path_csv} already exists.")
-
+    # else:
+    #     print(f"The file {file_path_csv} already exists.")
+    return all_angle, all_torque
+    
 
 def plot_angle_data(encoder_time, encoder_angle, JIM_time = None, JIM_angle = None):
     plt.figure(figsize=(8, 6))
@@ -151,23 +155,28 @@ def plot_piecewise_fit():
     plt.legend()
     plt.show()
 
-csv_file = "ExoBoot/data/basic_controller_motor_3.csv"
-cal_file = "ExoBoot/data/basic_controller_motor_CAL_3.mat"
-mat_file = "ExoBoot/data/basic_controller_motor_EXO_3.mat"
 
-_, JIM_angle, JIM_torque =  load_mat(mat_file, cal_file, False, False)
-_, JIM_angle_filt, JIM_torque_filt =  load_mat(mat_file, cal_file, False, True)
-controller_data = pd.read_csv(csv_file)
+def plot_controller_data():
+    csv_file = "ExoBoot/data/basic_controller_motor_3.csv"
+    cal_file = "ExoBoot/data/basic_controller_motor_CAL_3.mat"
+    mat_file = "ExoBoot/data/basic_controller_motor_EXO_3.mat"
 
-if __name__ == '__main__':
+    _, JIM_angle, JIM_torque =  load_mat(mat_file, cal_file, False, False)
+    _, JIM_angle_filt, JIM_torque_filt =  load_mat(mat_file, cal_file, False, True)
+    controller_data = pd.read_csv(csv_file)
+
     plt.figure(figsize=(8, 6))
-    # plt.scatter(JIM_angle, JIM_torque, label='output torque', s=3)
-    # plt.scatter(JIM_angle_filt, JIM_torque_filt, label='filtered', s=3)
+    plt.scatter(JIM_angle, JIM_torque, label='JIM_torque', s=3)
+    plt.scatter(JIM_angle_filt, JIM_torque_filt, label='JIM_filtered', s=3)
     plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"], label='command', s=3)
-    plt.scatter(controller_data["ankle_angle"], controller_data["passive_torque"], label='passive', s=3)
-    plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"] + controller_data["passive_torque"], label='output', s=3)
+    # plt.scatter(controller_data["ankle_angle"], controller_data["passive_torque"], label='passive', s=3)
+    # plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"] + controller_data["passive_torque"], label='output', s=3)
     plt.xlabel('Angle [deg]')
     plt.ylabel('Torque')
     plt.grid(True)
     plt.legend()
     plt.show()
+
+
+if __name__ == '__main__':
+    plot_controller_data()
