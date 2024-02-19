@@ -157,9 +157,9 @@ def plot_piecewise_fit():
 
 
 def plot_controller_data():
-    csv_file = "ExoBoot/data/basic_controller_motor_4.csv"
-    cal_file = "ExoBoot/data/basic_controller_motor_CAL_4.mat"
-    mat_file = "ExoBoot/data/basic_controller_motor_EXO_4.mat"
+    csv_file = "ExoBoot/data/basic_controller_motor_5.csv"
+    cal_file = "ExoBoot/data/basic_controller_motor_CAL_5.mat"
+    mat_file = "ExoBoot/data/basic_controller_motor_EXO_5.mat"
 
     _, JIM_angle, JIM_torque =  load_mat(mat_file, cal_file, False, False)
     _, JIM_angle_filt, JIM_torque_filt =  load_mat(mat_file, cal_file, False, True)
