@@ -17,7 +17,7 @@ from thermal_model import ThermalMotorModel
 MAX_TORQUE = 30
 NM_PER_AMP = 0.146
 
-ANKLE_LOG_VARS = ['time', 'commanded_torque', 'passive_torque', 'ankle_angle', 'device_current']
+ANKLE_LOG_VARS = ['time', 'desire_torque', 'commanded_torque', 'passive_torque', 'ankle_angle', 'device_current']
 
 
 class Controller():
@@ -57,6 +57,7 @@ class Controller():
             self.dev.update()   # Update
 
             passive_torque = 0
+
             # des_torque = -5
             amplitude = 2   # Nm
             frequency = 0.5 # Hz
@@ -80,7 +81,7 @@ class Controller():
                 i = 0
                 print("des torque = ", des_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
 
-            self.writer.writerow([t_curr, des_torque, passive_torque, current_angle, qaxis_curr])    
+            self.writer.writerow([t_curr, des_torque, command_torque, passive_torque, current_angle, qaxis_curr])    
 
         print("Controller closed")  
 

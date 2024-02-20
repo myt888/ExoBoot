@@ -157,22 +157,29 @@ def plot_piecewise_fit():
 
 
 def plot_controller_data():
-    csv_file = "ExoBoot/data/basic_controller_spring_1.csv"
+    csv_file = "ExoBoot/data/basic_controller_spring_2.csv"
     cal_file = "ExoBoot/data/basic_controller_spring_CAL_1.mat"
-    mat_file = "ExoBoot/data/basic_controller_spring_EXO_1.mat"
+    mat_file = "ExoBoot/data/basic_controller_spring_EXO_2.mat"
 
-    _, JIM_angle, JIM_torque =  load_mat(mat_file, cal_file, False, False)
-    _, JIM_angle_filt, JIM_torque_filt =  load_mat(mat_file, cal_file, False, True)
+    JIM_time, JIM_angle, JIM_torque =  load_mat(mat_file, cal_file, False, False)
+    JIM_time_filt, JIM_angle_filt, JIM_torque_filt =  load_mat(mat_file, cal_file, False, True)
     controller_data = pd.read_csv(csv_file)
 
     plt.figure(figsize=(8, 6))
-    plt.scatter(JIM_angle, JIM_torque, label='JIM_torque', s=2)
-    plt.scatter(JIM_angle_filt, JIM_torque_filt, label='JIM_filtered', s=2)
-    plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"], label='command', s=2)
-    plt.scatter(controller_data["ankle_angle"], controller_data["passive_torque"], label='passive', s=2)
-    plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"] + controller_data["passive_torque"], label='output', s=2)
-    plt.xlabel('Angle [deg]')
-    plt.ylabel('Torque')
+    # plt.scatter(JIM_angle, JIM_torque, label='JIM_torque', s=2)
+    # plt.scatter(JIM_angle_filt, JIM_torque_filt, label='JIM_filtered', s=2)
+    # plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"], label='command', s=2)
+    # plt.scatter(controller_data["ankle_angle"], controller_data["passive_torque"], label='passive', s=2)
+    # plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"] + controller_data["passive_torque"], label='output', s=2)
+    # plt.scatter(JIM_time, JIM_torque, label='JIM_torque', s=2)
+    # plt.scatter(JIM_time_filt, JIM_torque_filt, label='JIM_filtered', s=2)
+    plt.scatter(controller_data["time"], controller_data["commanded_torque"], label='command', s=2)
+    plt.scatter(controller_data["time"], controller_data["passive_torque"], label='passive', s=2)
+    plt.scatter(controller_data["time"], controller_data["desire_torque"], label='output', s=2)
+    # plt.xlabel('Angle [deg]')
+    # plt.ylabel('Torque')
+    plt.xlabel('Time [s]')
+    plt.ylabel('Torque [Nm]')
     plt.grid(True)
     plt.legend()
     plt.show()
