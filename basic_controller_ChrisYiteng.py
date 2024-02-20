@@ -52,11 +52,15 @@ class Controller():
         time.sleep(0.5)
         
         for t in loop: 
+            t_curr = time.time() - t0 
             i = i + 1
             self.dev.update()   # Update
 
             passive_torque = 0
-            des_torque = -5 # Plantar -
+            # des_torque = -5
+            amplitude = 2   # Nm
+            frequency = 0.5 # Hz
+            des_torque = amplitude * np.sin(2 * np.pi * frequency * t_curr) - 5 # Plantar -
 
             # Encoder: Plantar - (Convention)
             encoder_angle = self.dev.get_output_angle_degrees()
@@ -67,8 +71,8 @@ class Controller():
             elif current_angle < -18:
                 passive_torque = proc.get_passive_torque(-18)
 
-            des_torque -= passive_torque
-            self.dev.set_output_torque_newton_meters(des_torque)
+            command_torque = des_torque - passive_torque
+            self.dev.set_output_torque_newton_meters(command_torque)
 
             qaxis_curr = self.dev.get_current_qaxis_amps()
             
@@ -76,7 +80,6 @@ class Controller():
                 i = 0
                 print("des torque = ", des_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
 
-            t_curr = time.time() - t0 
             self.writer.writerow([t_curr, des_torque, passive_torque, current_angle, qaxis_curr])    
 
         print("Controller closed")  
