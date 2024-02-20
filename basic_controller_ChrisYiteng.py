@@ -60,7 +60,7 @@ class Controller():
 
             # des_torque = -5
             amplitude = 2   # Nm
-            frequency = 0.25 # Hz
+            frequency = 0.1 # Hz
             des_torque = amplitude * np.sin(2 * np.pi * frequency * t_curr) - 5 # Plantar -
 
             # Encoder: Plantar - (Convention)
