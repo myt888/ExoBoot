@@ -364,5 +364,3 @@ if __name__ == '__main__':
                 fsr.start()
                 with Controller(dev, imuShank, imuFoot, dt = dt) as controller:
                     controller.energy_shaping()
-                    
-    
