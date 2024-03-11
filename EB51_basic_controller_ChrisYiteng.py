@@ -83,7 +83,7 @@ class Controller():
 
             self.writer.writerow([t_curr, des_torque, command_torque, passive_torque, current_angle, qaxis_curr])    
 
-        print("Controller closed")  
+        print("Controller closed")
 
 if __name__ == '__main__':
     dt = 1/200
