@@ -3,7 +3,8 @@ clear;
 
 data = readtable('ankle_test_right_swing_112run1.csv', 'VariableNamingRule','modify');
 port = serialport('COM3',115200);
-freq = 250; % Hz
+ipAddress = '35.3.141.14';
+freq = 4000; % Hz
 %%
 tic; % Start timing
 
