@@ -17,7 +17,7 @@ try:
         data_str, addr = s.recvfrom(1024)
         data_str = data_str.decode()
         if data_str:
-            if data_str == 'E':
+            if data_str == 'END':
                 break
 
             try:

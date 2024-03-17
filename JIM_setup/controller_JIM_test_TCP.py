@@ -10,28 +10,26 @@ period = 1 / freq
 
 remote_port = 12345
 remote_ip = '35.3.141.14'
+end_marker = 'END'
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((remote_ip, remote_port))
-
 print('TCP client is connected to the server.')
 
 data_str = []
 for i in range(sample_num):
     data_str.append(f"{data['Ankle Angle'][i]},{data['Controller Torque'][i]}")
 
-start_time = time.time()
 
+start_time = time.time()
 for i in range(sample_num):
     s.send(data_str[i].encode())
-
     elapsed_time = time.time() - start_time
     sleep_time = period - elapsed_time % period
     if sleep_time > 0:
         time.sleep(sleep_time)
-
-end_marker = 'END'
 s.send(end_marker.encode())
+
 
 elapsed_time = time.time() - start_time
 send_freq = sample_num / elapsed_time

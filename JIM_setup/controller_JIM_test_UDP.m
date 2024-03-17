@@ -23,29 +23,29 @@ disp('Data Loaded');
 tic;
 i = 1;
 next_time = 0;
-while i <= sample_num
-    write(udp_sender, data_str{i}, 'string', remote_ip, remote_port);
-    
-    next_time = next_time + period;
-    elapsed_time = toc;
-    while elapsed_time < next_time
-        pause(1e-6);
-        elapsed_time = toc;
-    end
-    i = i + 1;
-end
-
-% for i = 1:sample_num
+% while i <= sample_num
 %     write(udp_sender, data_str{i}, 'string', remote_ip, remote_port);
 % 
+%     next_time = next_time + period;
 %     elapsed_time = toc;
-%     pause_time = period - mod(elapsed_time, period);
-%     if pause_time > 0
-%         pause(pause_time);
+%     while elapsed_time < next_time
+%         pause(1e-6);
+%         elapsed_time = toc;
 %     end
+%     i = i + 1;
 % end
 
-end_marker = 'E';
+for i = 1:sample_num
+    write(udp_sender, data_str{i}, 'string', remote_ip, remote_port);
+
+    elapsed_time = toc;
+    pause_time = period - mod(elapsed_time, period);
+    if pause_time > 0
+        pause(pause_time);
+    end
+end
+
+end_marker = 'END';
 write(udp_sender, end_marker, 'string', remote_ip, remote_port);
 
 elapsed_time = toc;
