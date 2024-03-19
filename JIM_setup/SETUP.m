@@ -45,20 +45,20 @@ disp('******MAKE SURE TIME MATCHES TOTAL TIME OF ANKLETEST******')
 
 
 %% 10. Run test (Nikko)
-total_time = 15; % Set desired trial length (seconds)
-time = [0,0.25,0.75,1]*total_time;
-% total_time = 20; % Set desired trial length (seconds)
+% total_time = 15; % Set desired trial length (seconds)
 % time = [0,0.25,0.75,1]*total_time;
-H = ConfigScopes(H,total_time,0,0.001,1,1); % Fs = 1 kHz
-
-% position = [0, -10, 10, 0];
-% position = [0, -12, 12, 0];
-position = [0, -15, 15, 0];
-% position = [0, -25, 25, 0];
-% position = [0, -25, -25, 0];
-%position = [0, -20, 20, 0];
-
-output = ankleTest(H, time,  position); 
+% % total_time = 20; % Set desired trial length (seconds)
+% % time = [0,0.25,0.75,1]*total_time;
+% H = ConfigScopes(H,total_time,0,0.001,1,1); % Fs = 1 kHz
+% 
+% % position = [0, -10, 10, 0];
+% % position = [0, -12, 12, 0];
+% position = [0, -15, 15, 0];
+% % position = [0, -25, 25, 0];
+% % position = [0, -25, -25, 0];
+% %position = [0, -20, 20, 0];
+% 
+% output = ankleTest(H, time,  position); 
 
 
 %% 10. Run test (Kevin)
@@ -83,22 +83,22 @@ output = ankleTest(H, time,  position);
 % uisave('output',path2save);
  
 %% 10. Run test (Chris)
-% RoM = 7.5; %Degrees
-% clear position
-% clear time
-% clear output
-% [position, time] = ChrisJIMtraj(0);
-% % position_zeropad = zeros(size(position)); 
-% dt = time(2)-time(1);
-% 
-% position = position(1:5000); %max JIM input vector length
-% time = time(1:5000); %max JIM input vector length
-% 
-% total_time = max(time); % Set desired trial length 
-% H = ConfigScopes(H,total_time,0,dt,1,1); % Fs = 1 kHz
-% output = ankleTest(H, time, position);
-% path2save = 'C:\Users\Max\Desktop\Chris\20230731\CAL_long_slowsinewithpad001';
-% uisave('output',path2save);
+RoM = 7.5; %Degrees
+clear position
+clear time
+clear output
+[position, time] = ChrisJIMtraj(0);
+% position_zeropad = zeros(size(position)); 
+dt = time(2)-time(1);
+
+position = position(1:5000); %max JIM input vector length
+time = time(1:5000); %max JIM input vector length
+
+total_time = max(time); % Set desired trial length 
+H = ConfigScopes(H,total_time,0,dt,1,1); % Fs = 1 kHz
+output = ankleTest(H, time, position);
+path2save = 'C:\Users\Max\Desktop\Chris\20230731\CAL_long_slowsinewithpad001';
+uisave('output',path2save);
   
 
 %% 11. Save and Plot Stuff
