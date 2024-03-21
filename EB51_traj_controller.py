@@ -4,6 +4,8 @@ import pickle  # Document read/save (record foot sensor file)
 import os  # For document read/save (combined with pickle)
 import gc   # Memory leak clearance
 import processor as proc
+import pandas as pd
+import TCP_trigger as trigger
 import sys
 import csv
 import time
@@ -18,7 +20,7 @@ MAX_TORQUE = 30
 NM_PER_AMP = 0.146
 
 ANKLE_LOG_VARS = ['time', 'desire_torque', 'commanded_torque', 'passive_torque', 'ankle_angle', 'device_current']
-
+traj_data = pd.read_csv(f'/home/pi/ExoBoot/JIM_setup/ankle_test_right_swing_112run1.csv')
 
 class Controller():
     def __init__(self, dev, dt):
@@ -46,22 +48,22 @@ class Controller():
         self.dev.set_current_gains() 
 
         i = 0
+        line = 0
         t0 = time.time()
+        weight = 80 # Kg
         
         loop = SoftRealtimeLoop(dt = self.dt, report=True, fade=0.01)
         time.sleep(0.5)
         
         for t in loop: 
             t_curr = time.time() - t0 
-            i = i + 1
+            
+            i += 1
             self.dev.update()   # Update
 
             passive_torque = 0
 
-            des_torque = -5
-            # amplitude = 2   # Nm
-            # frequency = 0.1 # Hz
-            # des_torque = amplitude * np.sin(2 * np.pi * frequency * t_curr) - 5 # Plantar -
+            des_torque = weight * traj_data['Controller Torque'][line]
 
             # Encoder: Plantar -
             encoder_angle = self.dev.get_output_angle_degrees()
@@ -81,12 +83,18 @@ class Controller():
                 i = 0
                 print("des torque = ", des_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
 
-            self.writer.writerow([t_curr, des_torque, command_torque, passive_torque, current_angle, qaxis_curr])    
-
+            self.writer.writerow([t_curr, des_torque, command_torque, passive_torque, current_angle, qaxis_curr])
+                
+            line += 1
         print("Controller closed")
 
+
 if __name__ == '__main__':
-    dt = 1/200
+    dt = 1/250
+    ip = ''
+    port = 12345
+    data_path = 'I:\\My Drive\\Locomotor\\ExoBoot\\JIM_setup\\ankle_test_right_swing_112run1.csv'
+
     with EB51Man(devttyACMport = '/dev/ttyACM0', whichAnkle = 'right', updateFreq=1000, csv_file_name = "ankle_log.csv", dt = dt) as dev:
         with Controller(dev, dt = dt) as controller:
             controller.control()

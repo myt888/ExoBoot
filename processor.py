@@ -1,6 +1,8 @@
 import json
+import time
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 from scipy.signal import butter, filtfilt
 from scipy.optimize import curve_fit, minimize
 from sklearn.metrics import r2_score, mean_squared_error
@@ -116,6 +118,29 @@ def get_passive_torque(angle):
     breakpoint = fit_results['breakpoint']
 
     fit_function = (lambda x: piecewise_function(x, logistic_params, poly_params, breakpoint))
-    passive_torque = - fit_function(angle) # Positive for dorsiflexion torque
+    passive_torque = - fit_function(angle) # + for dorsiflexion torque
     # print_piecewise_equations(logistic_params,poly_params,breakpoint)
     return passive_torque
+
+
+def read_traj_data(file_path, num_rows, freq):
+    data = pd.read_csv(file_path)
+    start_time = time.time()
+    period = 1 / freq
+
+    if num_rows is None:
+        num_rows = len(data)
+        
+    for i in range(num_rows):
+        ankle_angle = data['Ankle Angle'][i]
+        controller_torque = data['Controller Torque'][i]
+        yield ankle_angle, controller_torque
+            
+        elapsed_time = time.time() - start_time
+        sleep_time = period - elapsed_time % period
+        if sleep_time > 0:
+            time.sleep(sleep_time)
+
+    total_time = time.time() - start_time
+    print(f"Total time to read all data: {total_time:.3f} seconds")
+    print(f"Actual frequency: {num_rows/total_time:.3f} Hz")
