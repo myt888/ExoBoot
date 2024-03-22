@@ -44,6 +44,7 @@ function [ pos, time ] = ChrisJIMtraj( trajno )
         period = 1/freq;
         
         newtimes = linspace(traj_data_time(1), traj_data_time(end), round((traj_data_time(end)/period)+1));
+        newtimes = newtimes - traj_data_time(1);
         newangles = interp1(traj_data_time, traj_data_angle, newtimes);
         
         pos = newangles;
