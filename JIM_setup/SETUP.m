@@ -87,7 +87,7 @@ RoM = 7.5; %Degrees
 clear position
 clear time
 clear output
-[position, time] = ChrisJIMtraj(0);
+[position, time] = ChrisJIMtraj(1);
 % position_zeropad = zeros(size(position)); 
 dt = time(2)-time(1);
 
@@ -95,9 +95,12 @@ position = position(1:5000); %max JIM input vector length
 time = time(1:5000); %max JIM input vector length
 
 total_time = max(time); % Set desired trial length 
-H = ConfigScopes(H,total_time,0,dt,1,1); % Fs = 1 kHz
+H = ConfigScopes(H,total_time,0,dt,1,1); % Fs = 1/dt Hz
+
+TCP_trigger()   % Send TCP trigger
+
 output = ankleTest(H, time, position);
-path2save = 'C:\Users\Max\Desktop\Chris\20230731\CAL_long_slowsinewithpad001';
+path2save = 'C:\Users\Max\Desktop\Chris\20240322\Yiteng_data_from_Katharine_on_EB51';
 uisave('output',path2save);
   
 
