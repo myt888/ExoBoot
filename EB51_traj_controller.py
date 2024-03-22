@@ -50,7 +50,6 @@ class Controller():
         i = 0
         line = 0
         t0 = time.time()
-        weight = 80 # Kg
         
         loop = SoftRealtimeLoop(dt = self.dt, report=True, fade=0.01)
         time.sleep(0.5)
@@ -63,7 +62,7 @@ class Controller():
 
             passive_torque = 0
 
-            des_torque = weight * traj_data['Controller Torque'][line]
+            des_torque = traj_data['Commanded Torque'][line]
 
             # Encoder: Plantar -
             encoder_angle = self.dev.get_output_angle_degrees()
