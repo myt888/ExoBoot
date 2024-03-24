@@ -19,8 +19,8 @@ from thermal_model import ThermalMotorModel
 MAX_TORQUE = 30
 NM_PER_AMP = 0.146
 
-ANKLE_LOG_VARS = ['time', 'desire_torque', 'commanded_torque', 'passive_torque', 'ankle_angle', 'device_current']
-traj_data = pd.read_csv(f'/home/pi/ExoBoot/JIM_setup/ankle_test_right_swing_112run1.csv')
+ANKLE_LOG_VARS = ['time', 'desire_torque', 'passive_torque', 'commanded_torque', 'ankle_angle', 'device_current']
+traj_data = pd.read_csv(f'/home/pi/ExoBoot/JIM_setup/traj_data_Katharine.csv')
 
 class Controller():
     def __init__(self, dev, dt):
@@ -28,7 +28,7 @@ class Controller():
         self.dev = dev
 
         self.cf_name = 'PEA_test_R_{0}.csv'.format(time.strftime("%Y%m%d-%H%M%S"))
-        self.cf_path = os.path.join('/home/pi/ExoBoot/data_basic_controller', self.cf_name)
+        self.cf_path = os.path.join('/home/pi/ExoBoot/data_traj_controller', self.cf_name)
         self.cf = open(self.cf_path, 'w', encoding='UTF8', newline='')
         self.writer = csv.writer(self.cf)
 
@@ -54,6 +54,8 @@ class Controller():
         loop = SoftRealtimeLoop(dt = self.dt, report=True, fade=0.01)
         time.sleep(0.5)
         
+        # trigger.wait_for_trigger()  # Waiting for trigger
+
         for t in loop: 
             t_curr = time.time() - t0 
             
@@ -62,7 +64,7 @@ class Controller():
 
             passive_torque = 0
 
-            des_torque = traj_data['Commanded Torque'][line]
+            des_torque = traj_data['commanded_torque'][line]
 
             # Encoder: Plantar -
             encoder_angle = self.dev.get_output_angle_degrees()
@@ -74,7 +76,10 @@ class Controller():
                 passive_torque = proc.get_passive_torque(-18)
 
             command_torque = des_torque - passive_torque
-            self.dev.set_output_torque_newton_meters(command_torque)
+            if command_torque <= MAX_TORQUE:
+                self.dev.set_output_torque_newton_meters(command_torque)
+            else:
+                self.dev.set_output_torque_newton_meters(MAX_TORQUE)
 
             qaxis_curr = self.dev.get_current_qaxis_amps()
             
@@ -82,7 +87,7 @@ class Controller():
                 i = 0
                 print("des torque = ", des_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
 
-            self.writer.writerow([t_curr, des_torque, command_torque, passive_torque, current_angle, qaxis_curr])
+            self.writer.writerow([t_curr, des_torque, passive_torque, command_torque, current_angle, qaxis_curr])
                 
             line += 1
         print("Controller closed")
