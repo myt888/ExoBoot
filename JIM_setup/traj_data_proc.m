@@ -26,9 +26,6 @@ order = 4;
 filtered_angles = filtfilt(b, a, new_angles);
 filtered_torques = filtfilt(b, a, new_torque);
 
-figure
-plot(traj_data_time(1:3000),traj_data_angle(1:3000),'LineWidth',1)
-
 
 figure
 plot(new_times(1:3000),new_torque(1:3000),'LineWidth',1)

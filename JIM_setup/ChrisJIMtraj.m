@@ -41,7 +41,9 @@ function [ pos, time ] = ChrisJIMtraj( trajno )
         pos = traj_data_angle;
         trajectory.time = traj_data_time;
 
-        
+        % figure
+        % plot(trajectory.time(1:3000),pos(1:3000),'LineWidth',1)
+
     else
         trajectory.time = 0;
         trajectory.angle = 0;
