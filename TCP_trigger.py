@@ -23,3 +23,7 @@ def wait_for_trigger(ip, port):
             print("Stopping Manually")
     conn.close()
     sock.close()
+
+ip = '192.168.1.1'
+port = 12345
+wait_for_trigger(ip, port)
