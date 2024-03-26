@@ -1,5 +1,5 @@
 function [ pos, time ] = ChrisJIMtraj( trajno )
-%CHRISJIMTRAJ Summary of this function goes here
+% CHRISJIMTRAJ Summary of this function goes here
 %   Detailed explanation goes here
     if trajno == 0
         padtime = 10;
@@ -7,12 +7,12 @@ function [ pos, time ] = ChrisJIMtraj( trajno )
         timelengthfull = timelength + padtime;
         dt = .01;
 
-        w = .2; %hz sine
-        max = 18; %max PLANTAR
-        min = -25; %max DORSI
-%         a = 50/2; %deg amp
+        w = .2; % hz sine
+        max = 18;   % max PLANTAR
+        min = -25;  % max DORSI
+        % a = 50/2; % deg amp
         a = (max-min)/2;
-%         b = -5; %deg offset
+        % b = -5;   % deg offset
         b = min+a;
         trajectory.time = linspace(0,timelengthfull,timelengthfull/dt + 1);
         
@@ -24,7 +24,7 @@ function [ pos, time ] = ChrisJIMtraj( trajno )
         while (trajectory.angle(k)<0)
             k = k+1;
         end
-%         phaseshift = 0;
+        % phaseshift = 0;
         phaseshift = trajectory.time(k)+(padtime/dt);
         
         pos = a*sin(2*pi*w*(trajectory.time + phaseshift))+b;
