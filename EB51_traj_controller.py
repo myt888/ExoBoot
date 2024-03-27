@@ -95,10 +95,6 @@ class Controller():
 
 if __name__ == '__main__':
     dt = 1/250
-    ip = ''
-    port = 12345
-    data_path = 'I:\\My Drive\\Locomotor\\ExoBoot\\JIM_setup\\ankle_test_right_swing_112run1.csv'
-
     with EB51Man(devttyACMport = '/dev/ttyACM0', whichAnkle = 'right', updateFreq=1000, csv_file_name = "ankle_log.csv", dt = dt) as dev:
         with Controller(dev, dt = dt) as controller:
             controller.control()
