@@ -2,7 +2,7 @@ import socket
 import time
 
 
-def wait_for_trigger(ip, port):
+def wait_for_TCP_trigger(ip, port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind((ip, port))
     sock.listen(1)
@@ -24,6 +24,6 @@ def wait_for_trigger(ip, port):
     conn.close()
     sock.close()
 
-ip = '192.168.1.1'
-port = 12345
-wait_for_trigger(ip, port)
+def wait_for_manual_trigger():
+    input("Press Enter to start...")
+    print("Starting trigger received.")

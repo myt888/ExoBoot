@@ -118,10 +118,10 @@ def get_passive_torque(angle):
     breakpoint = fit_results['breakpoint']
 
     fit_function = (lambda x: piecewise_function(x, logistic_params, poly_params, breakpoint))
-    passive_torque = - fit_function(angle) # + for dorsiflexion torque
-    # print_piecewise_equations(logistic_params,poly_params,breakpoint)
-    return passive_torque
 
+    angle = max(min(angle, 25), -18)
+    passive_torque = fit_function(angle)
+    return passive_torque
 
 def read_traj_data(file_path, num_rows, freq):
     data = pd.read_csv(file_path)

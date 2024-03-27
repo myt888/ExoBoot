@@ -5,7 +5,7 @@ import os  # For document read/save (combined with pickle)
 import gc   # Memory leak clearance
 import processor as proc
 import pandas as pd
-import TCP_trigger as trigger
+import trigger as trigger
 import sys
 import csv
 import time
@@ -41,7 +41,6 @@ class Controller():
         print("exiting")
 
     def control(self):
-        # Write log header
         self.writer.writerow(ANKLE_LOG_VARS)
 
         self.dev.realign_calibration()
@@ -50,11 +49,12 @@ class Controller():
         i = 0
         line = 0
         t0 = time.time()
-        
+        synced = False
+
+        trigger.wait_for_manual_trigger()
+
         loop = SoftRealtimeLoop(dt = self.dt, report=True, fade=0.01)
         time.sleep(0.5)
-        
-        # trigger.wait_for_trigger()  # Waiting for trigger
 
         for t in loop: 
             t_curr = time.time() - t0 
@@ -62,24 +62,21 @@ class Controller():
             i += 1
             self.dev.update()   # Update
 
-            passive_torque = 0
+            encoder_angle = self.dev.get_output_angle_degrees() # Encoder: Plantar -
+            current_angle = encoder_angle - 90
+
+            if not synced:
+                if abs(current_angle) > 0.05:
+                    synced = True
+                    print("Synced with JIM device")
+                else:
+                    i = 0
+                    continue
 
             des_torque = traj_data['commanded_torque'][line]
-
-            # Encoder: Plantar -
-            encoder_angle = self.dev.get_output_angle_degrees()
-            current_angle = encoder_angle - 90  # Initial angle set at 90
-
-            if -18 <= current_angle <= 25:
-                passive_torque = proc.get_passive_torque(current_angle)
-            elif current_angle < -18:
-                passive_torque = proc.get_passive_torque(-18)
-
-            command_torque = des_torque - passive_torque
-            if command_torque <= MAX_TORQUE:
-                self.dev.set_output_torque_newton_meters(command_torque)
-            else:
-                self.dev.set_output_torque_newton_meters(MAX_TORQUE)
+            passive_torque = proc.get_passive_torque(current_angle)
+            command_torque = min(des_torque - passive_torque, MAX_TORQUE)
+            self.dev.set_output_torque_newton_meters(command_torque)
 
             qaxis_curr = self.dev.get_current_qaxis_amps()
             
@@ -88,8 +85,8 @@ class Controller():
                 print("des torque = ", des_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
 
             self.writer.writerow([t_curr, des_torque, passive_torque, command_torque, current_angle, qaxis_curr])
-                
             line += 1
+
         print("Controller closed")
 
 
