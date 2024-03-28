@@ -26,6 +26,13 @@ order = 4;
 filtered_angles = filtfilt(b, a, new_angles);
 filtered_torques = filtfilt(b, a, new_torque);
 
+figure
+plot(new_times(1:5000),new_torque(1:5000),'LineWidth',1)
+hold on
+plot(new_times(1:5000),filtered_torques(1:5000),'LineWidth',1)
+hold off
+xlabel("time [s]")
+ylabel("torque [Nm]")
 
 figure
 plot(new_times(1:5000),new_torque(1:5000),'LineWidth',1)

@@ -157,9 +157,9 @@ def plot_piecewise_fit():
 
 
 def plot_controller_data():
-    csv_file = "ExoBoot/data_basic_controller/basic_controller_motor_2.csv"
-    cal_file = "ExoBoot/data_basic_controller/basic_controller_spring_CAL_1_4.mat"
-    mat_file = "ExoBoot/data_basic_controller/basic_controller_spring_EXO_1.mat"
+    csv_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_EXO_1.csv"
+    cal_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_CAL.mat"
+    mat_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_EXO_1.mat"
 
     JIM_time, JIM_angle, JIM_torque =  load_mat(mat_file, cal_file, False, False)
     JIM_time_filt, JIM_angle_filt, JIM_torque_filt =  load_mat(mat_file, cal_file, False, True)
@@ -181,7 +181,7 @@ def plot_controller_data():
     # plt.scatter(controller_data["time"], controller_data["passive_torque"], label='passive', s=2)
     # plt.scatter(controller_data["time"], controller_data["desire_torque"], label='desire', s=2)
     plt.xlabel('Time [s]')
-    plt.ylabel('Ankle Angle [deg]')
+    plt.ylabel('Torque [Nm]')
 
     plt.grid(True)
     plt.legend()

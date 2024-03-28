@@ -27,7 +27,7 @@ class Controller():
         self.dev = dev
 
         self.cf_name = 'PEA_test_R_{0}.csv'.format(time.strftime("%Y%m%d-%H%M%S"))
-        self.cf_path = os.path.join('/home/pi/ExoBoot/data_basic_controller', self.cf_name)
+        self.cf_path = os.path.join('/home/pi/ExoBoot/data_move_trigger', self.cf_name)
         self.cf = open(self.cf_path, 'w', encoding='UTF8', newline='')
         self.writer = csv.writer(self.cf)
 
@@ -39,7 +39,7 @@ class Controller():
         self.cf.close()
         print("exiting")
 
-    def calibrate_angle(self, samples = 500):
+    def calibrate_angle(self, samples = 1000):
         input("Press Enter to start angle calibration...")
 
         angles = [self.dev.get_output_angle_degrees() for _ in range(samples)]
@@ -64,24 +64,20 @@ class Controller():
         loop = SoftRealtimeLoop(dt = self.dt, report=True, fade=0.01)
         time.sleep(0.5)
         
-        for t in loop: 
+        for t in loop:         
             t_curr = time.time() - t0 
             i = i + 1
             self.dev.update()   # Update
 
-            passive_torque = 0
-
-            des_torque = -5
-
             current_angle = self.dev.get_output_angle_degrees()  - calibration_angle   # Initial angle set at 90
 
             if not synced:
+                des_torque = 0
                 if abs(current_angle) > 1:
                     synced = True
                     print("Synced with JIM device. Start commanding torque.")
-                else:
-                    i = 0
-                    continue
+            else:
+                des_torque = -5
 
             passive_torque = proc.get_passive_torque(current_angle)
             command_torque = min(des_torque - passive_torque, MAX_TORQUE)
