@@ -41,11 +41,9 @@ class Controller():
 
     def calibrate_angle(self, samples = 1000):
         input("Press Enter to start angle calibration...")
-
-        angles = [self.dev.get_output_angle_degrees() for _ in range(samples)]
-        calibration_angle = sum(angles) / samples
-        
-        print(f"calibration complete. zero angle set to {calibration_angle:.3f} deg")
+        angles = [self.dev.get_output_angle_degrees() - 90 for _ in range(samples)]
+        calibration_angle = sum(angles[-100:]) / len(angles[-100:])
+        print(f"calibration complete. start angle: {calibration_angle:.3f} deg")
         return calibration_angle
 
     def control(self):
@@ -69,11 +67,11 @@ class Controller():
             i = i + 1
             self.dev.update()   # Update
 
-            current_angle = self.dev.get_output_angle_degrees()  - calibration_angle   # Initial angle set at 90
+            current_angle = self.dev.get_output_angle_degrees() - 90   # Initial angle set at 90
 
             if not synced:
                 des_torque = 0
-                if abs(current_angle) > 0.1:
+                if abs(current_angle - calibration_angle) > 0.5:
                     synced = True
                     print("Synced with JIM device. Start commanding torque.")
             else:
