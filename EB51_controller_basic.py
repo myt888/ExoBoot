@@ -73,7 +73,7 @@ class Controller():
 
             if not synced:
                 des_torque = 0
-                if abs(current_angle) > 0.5:
+                if abs(current_angle) > 0.1:
                     synced = True
                     print("Synced with JIM device. Start commanding torque.")
             else:

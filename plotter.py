@@ -157,9 +157,9 @@ def plot_piecewise_fit():
 
 
 def plot_controller_data():
-    csv_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_EXO_1.csv"
+    csv_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_EXO_2.csv"
     cal_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_CAL.mat"
-    mat_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_EXO_1.mat"
+    mat_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_EXO_2.mat"
 
     JIM_time, JIM_angle, JIM_torque =  load_mat(mat_file, cal_file, False, False)
     JIM_time_filt, JIM_angle_filt, JIM_torque_filt =  load_mat(mat_file, cal_file, False, True)
@@ -171,8 +171,6 @@ def plot_controller_data():
     # plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"], label='command', s=2)
     # plt.scatter(controller_data["ankle_angle"], controller_data["passive_torque"], label='passive', s=2)
     # plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"] + controller_data["passive_torque"], label='output', s=2)
-    # plt.xlabel('Angle [deg]')
-    # plt.ylabel('Torque')
 
     # plt.scatter(JIM_time, JIM_torque, label='JIM_torque', s=2)
     # plt.scatter(JIM_time_filt, JIM_torque_filt, label='JIM_filtered', s=2)
@@ -180,8 +178,13 @@ def plot_controller_data():
     # plt.scatter(controller_data["time"], controller_data["commanded_torque"], label='command', s=2)
     # plt.scatter(controller_data["time"], controller_data["passive_torque"], label='passive', s=2)
     # plt.scatter(controller_data["time"], controller_data["desire_torque"], label='desire', s=2)
+    
+    # plt.ylim(-10, 5)
+    # plt.xlabel('Angle [deg]')
     plt.xlabel('Time [s]')
-    plt.ylabel('Torque [Nm]')
+    # plt.ylabel('Torque [Nm]')
+    plt.ylabel('Angle [deg]')
+
 
     plt.grid(True)
     plt.legend()
