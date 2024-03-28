@@ -123,6 +123,7 @@ def get_passive_torque(angle):
     passive_torque = fit_function(angle)
     return passive_torque
 
+
 def read_traj_data(file_path, num_rows, freq):
     data = pd.read_csv(file_path)
     start_time = time.time()

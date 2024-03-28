@@ -24,6 +24,7 @@ def wait_for_TCP_trigger(ip, port):
     conn.close()
     sock.close()
 
+
 def wait_for_manual_trigger():
     input("Press Enter to start...")
     print("Starting trigger received.")

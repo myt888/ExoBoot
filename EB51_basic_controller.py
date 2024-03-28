@@ -3,6 +3,7 @@ import numpy as np   # Numerical pythonimport math
 import pickle  # Document read/save (record foot sensor file)
 import os  # For document read/save (combined with pickle)
 import gc   # Memory leak clearance
+import trigger
 import processor as proc
 import sys
 import csv
@@ -38,6 +39,15 @@ class Controller():
         self.cf.close()
         print("exiting")
 
+    def calibrate_angle(self, samples = 500):
+        input("Press Enter to start angle calibration...")
+
+        angles = [self.dev.get_output_angle_degrees() for _ in range(samples)]
+        calibration_angle = sum(angles) / samples
+        
+        print(f"calibration complete. zero angle set to {calibration_angle:.3f} deg")
+        return calibration_angle
+
     def control(self):
         # Write log header
         self.writer.writerow(ANKLE_LOG_VARS)
@@ -47,7 +57,10 @@ class Controller():
 
         i = 0
         t0 = time.time()
+        synced = False
         
+        calibration_angle = self.calibrate_angle()
+
         loop = SoftRealtimeLoop(dt = self.dt, report=True, fade=0.01)
         time.sleep(0.5)
         
@@ -59,20 +72,19 @@ class Controller():
             passive_torque = 0
 
             des_torque = -5
-            # amplitude = 2   # Nm
-            # frequency = 0.1 # Hz
-            # des_torque = amplitude * np.sin(2 * np.pi * frequency * t_curr) - 5 # Plantar -
 
-            # Encoder: Plantar -
-            encoder_angle = self.dev.get_output_angle_degrees()
-            current_angle = encoder_angle - 90  # Initial angle set at 90
+            current_angle = self.dev.get_output_angle_degrees()  - calibration_angle   # Initial angle set at 90
 
-            if -18 <= current_angle <= 25:
-                passive_torque = proc.get_passive_torque(current_angle)
-            elif current_angle < -18:
-                passive_torque = proc.get_passive_torque(-18)
+            if not synced:
+                if abs(current_angle) > 1:
+                    synced = True
+                    print("Synced with JIM device. Start commanding torque.")
+                else:
+                    i = 0
+                    continue
 
-            command_torque = des_torque - passive_torque
+            passive_torque = proc.get_passive_torque(current_angle)
+            command_torque = min(des_torque - passive_torque, MAX_TORQUE)
             self.dev.set_output_torque_newton_meters(command_torque)
 
             qaxis_curr = self.dev.get_current_qaxis_amps()

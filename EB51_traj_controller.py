@@ -5,7 +5,7 @@ import os  # For document read/save (combined with pickle)
 import gc   # Memory leak clearance
 import processor as proc
 import pandas as pd
-import trigger as trigger
+import trigger
 import sys
 import csv
 import time
@@ -51,7 +51,7 @@ class Controller():
         t0 = time.time()
         synced = False
 
-        trigger.wait_for_manual_trigger()
+        trigger.wait_for_manual_trigger()   # Start Loop
 
         loop = SoftRealtimeLoop(dt = self.dt, report=True, fade=0.01)
         time.sleep(0.5)
@@ -66,14 +66,14 @@ class Controller():
             current_angle = encoder_angle - 90
 
             if not synced:
-                if abs(current_angle) > 0.05:
+                if abs(current_angle) > 0.1:
                     synced = True
                     print("Synced with JIM device")
                 else:
                     i = 0
                     continue
 
-            des_torque = traj_data['commanded_torque'][line]
+            des_torque = traj_data['commanded_torque'][line]    # Read Command Torque
             passive_torque = proc.get_passive_torque(current_angle)
             command_torque = min(des_torque - passive_torque, MAX_TORQUE)
             self.dev.set_output_torque_newton_meters(command_torque)
