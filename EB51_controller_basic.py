@@ -17,6 +17,7 @@ from thermal_model import ThermalMotorModel
 
 MAX_TORQUE = 30
 NM_PER_AMP = 0.146
+angle_offset = 0.28
 
 ANKLE_LOG_VARS = ['time', 'desire_torque', 'commanded_torque', 'passive_torque', 'ankle_angle', 'device_current']
 
@@ -40,15 +41,27 @@ class Controller():
         print("exiting")
 
     def calibrate_angle(self, samples = 1000):
+        self.dev.realign_calibration()
+        self.dev.set_current_gains() 
+
         input("Press Enter to start angle calibration...")
-        angles = [self.dev.get_output_angle_degrees() - 90 for _ in range(samples)]
+        angles = []
+        delay = self.dt
+
+        for i in range(samples):
+                current_angle = self.dev.get_output_angle_degrees() - 90 - angle_offset
+                angles.append(current_angle)
+                time.sleep(delay)
+                i += 1
+                if i % 50 == 0:
+                    print("Current Angle = ", current_angle)
+      
         calibration_angle = sum(angles[-100:]) / len(angles[-100:])
         print(f"calibration complete. start angle: {calibration_angle:.3f} deg")
         return calibration_angle
 
     def control(self):
-        # Write log header
-        self.writer.writerow(ANKLE_LOG_VARS)
+        self.writer.writerow(ANKLE_LOG_VARS)    # Write log header
 
         self.dev.realign_calibration()
         self.dev.set_current_gains() 
@@ -67,7 +80,7 @@ class Controller():
             i = i + 1
             self.dev.update()   # Update
 
-            current_angle = self.dev.get_output_angle_degrees() - 90   # Initial angle set at 90
+            current_angle = self.dev.get_output_angle_degrees() - 90 - angle_offset  # Initial angle set at 90
 
             if not synced:
                 des_torque = 0
@@ -88,11 +101,11 @@ class Controller():
                 print("des torque = ", des_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
 
             self.writer.writerow([t_curr, des_torque, command_torque, passive_torque, current_angle, qaxis_curr])    
-
         print("Controller closed")
 
 if __name__ == '__main__':
     dt = 1/200
     with EB51Man(devttyACMport = '/dev/ttyACM0', whichAnkle = 'right', updateFreq=1000, csv_file_name = "ankle_log.csv", dt = dt) as dev:
         with Controller(dev, dt = dt) as controller:
-            controller.control()
+            # controller.control()
+            controller.calibrate_angle()

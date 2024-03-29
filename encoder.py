@@ -23,14 +23,10 @@ def main(writer_Loop_l):
 	print("port_right:{}".format(port_right))
 
 	try:
-		
 		run_time_total = 30 # s
 
 		inProcedure = True # Run Time Control
 		input('Do you want to start streaming the exos?')
-
-		# CHARACTERIZE Right
-		side_right = "right"
 		
 		streamFreq = 1000 # Hz
 		data_log = False  # False means no logs will be saved
@@ -46,18 +42,9 @@ def main(writer_Loop_l):
 		countToDeg = 1/degToCount
 		SCALE_FACTOR = 360/16384
 
-		# side = 1 # left
-		# side = 2 # right
-		# sideMultiplier = 1	
-		# if (side == 1):
-		# 	sideMultiplier = -1 # -1
-		# elif (side == 2):
-		# 	sideMultiplier = 1 # 1
-
 		fxs.set_gains(dev_id_right, 40, 400, 0, 0, 0, 128)
 
 		while inProcedure:
-
 			i += 1
 
 			currentTime = time()
@@ -65,25 +52,15 @@ def main(writer_Loop_l):
 			
 			actPackStateR = fxs.read_device(dev_id_right)
 			sideMultiplierR = 1
-
-			# des_current = -1000*sideMultiplierR # mA
-			# fxs.send_motor_command(dev_id_right, fxe.FX_CURRENT, des_current)
-			# fxs.send_motor_command(dev_id_right, fxe.FX_VOLTAGE, 500)
 	
 			act_mot_angleR = sideMultiplierR * -((actPackStateR.mot_ang * countToDeg)) # deg
 			act_ank_angleR = sideMultiplierR * (SCALE_FACTOR * actPackStateR.ank_ang) # deg
-			# act_current = actPackStateR.mot_cur # mA2
 			
-			# data_frame_vec = [i, round(run_time,6), act_ank_angleR, act_mot_angleR, act_current]
 			data_frame_vec = [i, round(run_time,6), act_ank_angleR, act_mot_angleR]
-			# data_frame_vec = [i, round(run_time,6), actßackStateR]
 
 			writer_Loop_l.writerow(data_frame_vec)
 			sleep(0.001)
 
-
-			# if run_time >= run_time_total:
-			# 	inProcedure = False
 		
 	
 	except:
@@ -102,7 +79,6 @@ def main(writer_Loop_l):
 
 
 if __name__ == '__main__':
-
 	data_filename = '{0}_encoder_data_R.csv'.format(strftime("%Y%m%d-%H%M%S"))
 	file_path = '/home/pi/ExoBoot/data_encoder'
 	data_path = os.path.join(file_path, data_filename)
