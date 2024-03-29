@@ -63,15 +63,15 @@ class Controller():
     def control(self):
         self.writer.writerow(ANKLE_LOG_VARS)    # Write log header
 
-        self.dev.realign_calibration()
-        self.dev.set_current_gains() 
+        # self.dev.realign_calibration()
+        # self.dev.set_current_gains() 
+
+        calibration_angle = self.calibrate_angle()
 
         i = 0
         t0 = time.time()
         synced = False
         
-        calibration_angle = self.calibrate_angle()
-
         loop = SoftRealtimeLoop(dt = self.dt, report=True, fade=0.01)
         time.sleep(0.5)
         
@@ -107,5 +107,4 @@ if __name__ == '__main__':
     dt = 1/200
     with EB51Man(devttyACMport = '/dev/ttyACM0', whichAnkle = 'right', updateFreq=1000, csv_file_name = "ankle_log.csv", dt = dt) as dev:
         with Controller(dev, dt = dt) as controller:
-            # controller.control()
-            controller.calibrate_angle()
+            controller.control()
