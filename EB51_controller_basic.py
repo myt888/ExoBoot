@@ -3,7 +3,6 @@ import numpy as np   # Numerical pythonimport math
 import pickle  # Document read/save (record foot sensor file)
 import os  # For document read/save (combined with pickle)
 import gc   # Memory leak clearance
-import trigger
 import processor as proc
 import sys
 import csv
@@ -77,6 +76,7 @@ class Controller():
         
         for t in loop:         
             t_curr = time.time() - t0 
+
             i = i + 1
             self.dev.update()   # Update
 
@@ -96,10 +96,8 @@ class Controller():
 
             qaxis_curr = self.dev.get_current_qaxis_amps()
             
-            if i >= 50:
-                i = 0
+            if i % 50 == 0:
                 print("des torque = ", des_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
-
             self.writer.writerow([t_curr, des_torque, command_torque, passive_torque, current_angle, qaxis_curr])    
         print("Controller closed")
 

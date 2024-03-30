@@ -5,7 +5,6 @@ import os  # For document read/save (combined with pickle)
 import gc   # Memory leak clearance
 import processor as proc
 import pandas as pd
-import trigger
 import sys
 import csv
 import time
@@ -18,6 +17,7 @@ from thermal_model import ThermalMotorModel
 
 MAX_TORQUE = 30
 NM_PER_AMP = 0.146
+angle_offset = 0.28
 
 ANKLE_LOG_VARS = ['time', 'desire_torque', 'passive_torque', 'commanded_torque', 'ankle_angle', 'device_current']
 traj_data = pd.read_csv(f'/home/pi/ExoBoot/JIM_setup/traj_data_Katharine.csv')
@@ -40,18 +40,35 @@ class Controller():
         self.cf.close()
         print("exiting")
 
+    def calibrate_angle(self, samples = 1000):
+        self.dev.realign_calibration()
+        self.dev.set_current_gains() 
+
+        input("Press Enter to start angle calibration...")
+        angles = []
+        delay = self.dt
+
+        for i in range(samples):
+                current_angle = self.dev.get_output_angle_degrees() - 90 - angle_offset
+                angles.append(current_angle)
+                time.sleep(delay)
+                i += 1
+                if i % 50 == 0:
+                    print("Current Angle = ", current_angle)
+      
+        calibration_angle = sum(angles[-100:]) / len(angles[-100:])
+        print(f"calibration complete. start angle: {calibration_angle:.3f} deg")
+        return calibration_angle
+    
     def control(self):
         self.writer.writerow(ANKLE_LOG_VARS)
 
-        self.dev.realign_calibration()
-        self.dev.set_current_gains() 
+        calibration_angle = self.calibrate_angle()
 
         i = 0
         line = 0
         t0 = time.time()
         synced = False
-
-        trigger.wait_for_manual_trigger()   # Start Loop
 
         loop = SoftRealtimeLoop(dt = self.dt, report=True, fade=0.01)
         time.sleep(0.5)
@@ -62,18 +79,16 @@ class Controller():
             i += 1
             self.dev.update()   # Update
 
-            encoder_angle = self.dev.get_output_angle_degrees() # Encoder: Plantar -
-            current_angle = encoder_angle - 90
+            current_angle = self.dev.get_output_angle_degrees() - 90 - angle_offset  # Initial angle set at 90
 
             if not synced:
-                if abs(current_angle) > 0.1:
+                des_torque = 0
+                if abs(current_angle - calibration_angle) > 0.5:
                     synced = True
-                    print("Synced with JIM device")
-                else:
-                    i = 0
-                    continue
-
-            des_torque = traj_data['commanded_torque'][line]    # Read Command Torque
+                    print("Synced with JIM device. Start commanding torque.")
+            else:
+                des_torque = traj_data['commanded_torque'][line]    # Read Command Torque
+            
             passive_torque = proc.get_passive_torque(current_angle)
             command_torque = min(des_torque - passive_torque, MAX_TORQUE)
             self.dev.set_output_torque_newton_meters(command_torque)
