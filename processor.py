@@ -119,7 +119,7 @@ def get_passive_torque(angle):
 
     fit_function = (lambda x: piecewise_function(x, logistic_params, poly_params, breakpoint))
 
-    angle = max(min(angle, 25), -18)
+    angle = float(max(min(angle, 25), -18))
     passive_torque = fit_function(angle)
     return passive_torque
 

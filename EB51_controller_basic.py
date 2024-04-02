@@ -62,9 +62,6 @@ class Controller():
     def control(self):
         self.writer.writerow(ANKLE_LOG_VARS)    # Write log header
 
-        # self.dev.realign_calibration()
-        # self.dev.set_current_gains() 
-
         calibration_angle = self.calibrate_angle()
 
         i = 0

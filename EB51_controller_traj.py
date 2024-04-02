@@ -87,7 +87,10 @@ class Controller():
                     synced = True
                     print("Synced with JIM device. Start commanding torque.")
             else:
-                des_torque = traj_data['commanded_torque'][line]    # Read Command Torque
+                if line <= len(traj_data) - 1:
+                    des_torque = traj_data['commanded_torque'][line]    # Read Command Torque
+                else:
+                    des_torque = 0
             
             passive_torque = proc.get_passive_torque(current_angle)
             command_torque = min(des_torque - passive_torque, MAX_TORQUE)
@@ -95,13 +98,10 @@ class Controller():
 
             qaxis_curr = self.dev.get_current_qaxis_amps()
             
-            if i >= 50:
-                i = 0
+            if i % 50 == 0:
                 print("des torque = ", des_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
-
             self.writer.writerow([t_curr, des_torque, passive_torque, command_torque, current_angle, qaxis_curr])
             line += 1
-
         print("Controller closed")
 
 
