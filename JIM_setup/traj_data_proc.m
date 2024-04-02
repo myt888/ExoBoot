@@ -1,54 +1,65 @@
-% traj_data_path = "I:\My Drive\Locomotor\ExoBoot\JIM_setup\ankle_test_right_swing_112run1.csv";
-traj_data_path = "ankle_test_right_swing_112run1.csv";
-traj_data = readtable(traj_data_path,'VariableNamingRule','modify');
-
-traj_data_angle = -rad2deg(traj_data.AnkleAngle);   % Reverse for JIM
-traj_data_torque = traj_data.CommandedTorque;
-traj_data_time = traj_data.Time;
-
-start_index = find(traj_data_time > 8, 1);  % Trim off first 8 seconds
-
-trim_data_angle = traj_data_angle(start_index:end);
-trim_data_torque = traj_data_torque(start_index:end);
-trim_data_time = traj_data_time(start_index:end);
-trim_data_time = trim_data_time - trim_data_time(1);    % Reset starting point
-
+clear
+traj_data = readtable("ankle_test_right_swing_112run1.csv",'VariableNamingRule','modify');
+traj_data.AnkleAngle = - rad2deg(traj_data.AnkleAngle);   % Reverse for JIM
+%% Trim off first 8s
+trim_data = traj_data(find(traj_data.Time > 8, 1):end, :);
+trim_data.Time = trim_data.Time - trim_data.Time(1);
+%% Resample
 freq = 250;
 period = 1/freq;
-
-new_times = linspace(trim_data_time(1), trim_data_time(end), round((trim_data_time(end)/period)+1));
-new_angles = interp1(trim_data_time, trim_data_angle, new_times);
-new_torque = interp1(trim_data_time, trim_data_torque, new_times);
-
+new_times = linspace(trim_data.Time(1), trim_data.Time(end), round((trim_data.Time(end)/period)+1));
+new_angles = interp1(trim_data.Time, trim_data.AnkleAngle, new_times);
+new_torque = interp1(trim_data.Time, trim_data.CommandedTorque, new_times);
+%% Filter
 fc = 6;
 order = 4;
-
 [b, a] = butter(order, fc / (freq / 2), 'low');
 filtered_angles = filtfilt(b, a, new_angles);
 filtered_torques = filtfilt(b, a, new_torque);
+%% Re-Trim
+zero_indices = find(abs(filtered_angles) <= 0.1);
+start_index = zero_indices(2);
+end_index_range = zero_indices(zero_indices > start_index & zero_indices <= start_index + 5000);
+end_index = end_index_range(end);
+
+reset_times = new_times(start_index:end_index) - new_times(start_index);
+reset_angles = filtered_angles(start_index:end_index);
+reset_torques = filtered_torques(start_index:end_index);
+reset_angles(1) = 0;
+reset_angles(end) = 0;
+%% Plotting
+% figure
+% plot(traj_data.Time,traj_data.AnkleAngle,'LineWidth',1)
+% xlabel("time [s]")
+% ylabel("angle [deg]")
+
+% figure
+% plot(new_times,new_torque,'LineWidth',1)
+% hold on
+% plot(new_times,filtered_torques,'LineWidth',1)
+% hold off
+% xlabel("time [s]")
+% ylabel("torque [Nm]")
+
+% figure
+% scatter(new_times,new_angles,'LineWidth',1)
+% hold on
+% scatter(new_times,filtered_angles,'LineWidth',1)
+% hold off
+% legend('Data','Filtered')
+% xlabel("time [s]")
+% ylabel("angle [deg]")
 
 figure
-plot(traj_data_time(1:10000),traj_data_angle(1:10000),'LineWidth',1)
+plot(reset_times,reset_angles,'LineWidth',1)
 xlabel("time [s]")
 ylabel("angle [deg]")
 
 figure
-plot(new_times(1:5000),new_torque(1:5000),'LineWidth',1)
-hold on
-plot(new_times(1:5000),filtered_torques(1:5000),'LineWidth',1)
-hold off
+plot(reset_times,reset_torques,'LineWidth',1)
 xlabel("time [s]")
 ylabel("torque [Nm]")
-
-figure
-plot(new_times(1:5000),new_angles(1:5000),'LineWidth',1)
-hold on
-plot(new_times(1:5000),filtered_angles(1:5000),'LineWidth',1)
-hold off
-xlabel("time [s]")
-ylabel("angle [deg]")
-
-output_data = table(new_times', filtered_angles', filtered_torques', 'VariableNames', {'time', 'ankle_angle', 'commanded_torque'});
-% output_path = "I:\My Drive\Locomotor\ExoBoot\JIM_setup\traj_data_Katharine.csv";
+%% Write Data
+output_data = table(reset_times', reset_angles', reset_torques', 'VariableNames', {'time', 'ankle_angle', 'commanded_torque'});
 output_path = "traj_data_Katharine.csv";
 writetable(output_data, output_path);
