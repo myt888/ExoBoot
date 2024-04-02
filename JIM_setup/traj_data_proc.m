@@ -27,6 +27,13 @@ reset_angles = filtered_angles(start_index:end_index);
 reset_torques = filtered_torques(start_index:end_index);
 reset_angles(1) = 0;
 reset_angles(end) = 0;
+
+speed = diff(reset_angles)/period;
+speed(end+1)=0;
+acc = diff(reset_angles,2)/(period^2);
+acc(end+1)=0;
+acc(end+1)=0;
+
 %% Plotting
 % figure
 % plot(traj_data.Time,traj_data.AnkleAngle,'LineWidth',1)
@@ -54,6 +61,11 @@ figure
 plot(reset_times,reset_angles,'LineWidth',1)
 xlabel("time [s]")
 ylabel("angle [deg]")
+
+figure
+plot(reset_times,speed,'LineWidth',1)
+xlabel("time [s]")
+ylabel("speed [deg/s]")
 
 figure
 plot(reset_times,reset_torques,'LineWidth',1)
