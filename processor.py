@@ -105,7 +105,7 @@ def print_piecewise_equations(logistic_params, poly_params, breakpoint):
     print(f"Breakpoint: x = {breakpoint:.3f}")  
 
 
-def get_passive_torque(angle):
+def get_passive_torque(angle, angular_speed, speed_threshold):
     angle = np.asarray(angle, dtype=float)
 
     filename = f'/home/pi/ExoBoot/cam_torque_angle/piecewise_fit_params.json'
@@ -121,6 +121,13 @@ def get_passive_torque(angle):
 
     angle = float(max(min(angle, 25), -18))
     passive_torque = fit_function(angle)
+
+    if abs(angular_speed) > speed_threshold:
+        if angular_speed > 0:
+            passive_torque += -0.5  # Increase passive torque by 0.5 for plantar
+        elif angular_speed < 0:
+            passive_torque += 0.5  # Decrease passive torque by 0.5 for dorsi
+
     return passive_torque
 
 

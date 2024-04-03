@@ -60,7 +60,7 @@ def load_mat(file_path, calibration_path=None, adjust=False, lpf=False, cutoff=2
 
 
 def load_cam():
-    all_angle, all_torque = [], []
+    all_time, all_angle, all_torque = [], [], []
 
     for i in range(1, 6):
         file_index = f"{i:03d}"
@@ -71,21 +71,24 @@ def load_cam():
         JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM, file_path_JIM_cal, False, True)
 
         # plt.scatter(JIM_angle, JIM_torque, label=f'Torque_cam_{i}', s=1)
+        all_time.extend(JIM_time)
         all_angle.extend(JIM_angle)
         all_torque.extend(JIM_torque)
 
     all_angle = np.array(all_angle)
     all_torque = np.array(all_torque)
+    all_time = np.array(all_time)
 
     file_path_csv = "ExoBoot\\cam_torque_angle\\cam_torque_data.csv"
 
     if not os.path.exists(file_path_csv):
         os.makedirs(os.path.dirname(file_path_csv), exist_ok=True)
-        data = pd.DataFrame({'Angle': all_angle, 'Torque': all_torque})
+        data = pd.DataFrame({'time': all_time, 'angle': all_angle, 'torque': all_torque})
         data.to_csv(file_path_csv, index=False)
-    # else:
-    #     print(f"The file {file_path_csv} already exists.")
-    return all_angle, all_torque
+    else:
+        print(f"The file {file_path_csv} already exists.")
+
+    return all_time, all_angle, all_torque
     
 
 def plot_angle_data(encoder_time, encoder_angle, JIM_time = None, JIM_angle = None):
@@ -196,4 +199,4 @@ def plot_controller_data():
 
 
 if __name__ == '__main__':
-    plot_controller_data()
+    load_cam()

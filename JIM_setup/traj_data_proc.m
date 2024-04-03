@@ -63,11 +63,6 @@ xlabel("time [s]")
 ylabel("angle [deg]")
 
 figure
-plot(reset_times,speed,'LineWidth',1)
-xlabel("time [s]")
-ylabel("speed [deg/s]")
-
-figure
 plot(reset_times,reset_torques,'LineWidth',1)
 xlabel("time [s]")
 ylabel("torque [Nm]")
