@@ -28,7 +28,7 @@ class Controller():
         self.dev = dev
 
         self.cf_name = 'PEA_test_R_{0}.csv'.format(time.strftime("%Y%m%d-%H%M%S"))
-        self.cf_path = os.path.join('/home/pi/ExoBoot/data_move_trigger', self.cf_name)
+        self.cf_path = os.path.join('/home/pi/ExoBoot/data_vel_fit', self.cf_name)
         self.cf = open(self.cf_path, 'w', encoding='UTF8', newline='')
         self.writer = csv.writer(self.cf)
 
@@ -96,7 +96,7 @@ class Controller():
 
             if not synced:
                 des_torque = 0
-                if abs(current_angle - calibration_angle) > 0.5:
+                if abs(current_angle - calibration_angle) > 1:
                     synced = True
                     print("Synced with JIM device. Start commanding torque.")
             else:
