@@ -32,9 +32,9 @@ class Controller():
         self.cf = open(self.cf_path, 'w', encoding='UTF8', newline='')
         self.writer = csv.writer(self.cf)
 
-        self.num_samples = 100
+        self.num_samples = 50
         self.prev_angles = deque(maxlen=self.num_samples)
-        self.speed_threshold = 10
+        self.speed_threshold = 5
 
     def __enter__(self):
         self.dev.update()
