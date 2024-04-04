@@ -160,9 +160,9 @@ def plot_piecewise_fit():
 
 
 def plot_controller_data():
-    csv_file = "Exoboot/data_vel_fit/EB51_vel_fit_EXO_1.csv"
-    mat_file = "Exoboot/data_vel_fit/EB51_vel_fit_EXO_1.mat"
-    cal_file = "Exoboot/data_vel_fit/EB51_vel_fit_CAL.mat"
+    csv_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_vel_fit/EB51_vel_fit_EXO_2.csv"
+    mat_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_vel_fit/EB51_vel_fit_EXO_2.mat"
+    cal_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_vel_fit/EB51_vel_fit_CAL.mat"
 
     # csv_file = f"I:\My Drive\Locomotor\ExoBoot\data_move_trigger\EB51_move_trigger_EXO_3.csv"
     # mat_file = f"I:\My Drive\Locomotor\ExoBoot\data_move_trigger\EB51_move_trigger_EXO_3.mat"
@@ -182,17 +182,17 @@ def plot_controller_data():
     # plt.scatter(JIM_time, JIM_torque, label='JIM_torque', s=2)
     # plt.scatter(JIM_time_filt, JIM_torque_filt, label='JIM_filtered', s=2)
     # plt.scatter(controller_data["time"], controller_data["ankle_angle"], label='command', s=2)
-    # plt.scatter(controller_data["time"], controller_data["commanded_torque"], label='command', s=2)
+    plt.scatter(controller_data["time"], controller_data["commanded_torque"], label='command', s=2)
     plt.scatter(controller_data["time"], controller_data["passive_torque"], label='passive', s=2)
-    # plt.scatter(controller_data["time"], controller_data["desire_torque"], label='desire', s=2)
-    plt.scatter(controller_data["time"], controller_data["angular_speed"], label='angular speed', s=2)
+    plt.scatter(controller_data["time"], controller_data["desire_torque"], label='desire', s=2)
+    # plt.scatter(controller_data["time"], controller_data["angular_speed"], label='angular speed', s=2)
 
     
     # plt.ylim(-10, 5)
     # plt.xlabel('Angle [deg]')
     plt.xlabel('Time [s]')
-    plt.ylabel('angular speed [deg/s]')
-    # plt.ylabel('Torque [Nm]')
+    # plt.ylabel('angular speed [deg/s]')
+    plt.ylabel('Torque [Nm]')
     # plt.ylabel('Angle [deg]')
 
     plt.grid(True)
