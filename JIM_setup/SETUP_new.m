@@ -91,18 +91,17 @@ clear output
 % position_zeropad = zeros(size(position)); 
 dt = time(2)-time(1);
 
-position = position(1:5000); %max JIM input vector length
-time = time(1:5000); %max JIM input vector length
+if length(pos) >= 5000 && length(time) >= 5000
+    position = position(1:5000);    % max JIM input vector length
+    time = time(1:5000);    % max JIM input vector length
+end
 
 total_time = max(time); % Set desired trial length 
 H = ConfigScopes(H,total_time,0,dt,1,1); % Fs = 1/dt Hz
 
-TCP_trigger()   % Send TCP trigger
-
 output = ankleTest(H, time, position);
 path2save = 'C:\Users\Max\Desktop\Chris\20240322\Yiteng_data_from_Katharine_on_EB51';
 uisave('output',path2save);
-  
 
 %% 11. Save and Plot Stuff
 t = output(:,1);
@@ -110,8 +109,6 @@ angle = output(:,2);
 torque = -output(:,3);
 angle_N = angle; 
 torque_N = torque;
-
-
 
 t1 = 1/4*(1000*total_time-2000);
 t2 = 3/4*(1000*total_time-2000);

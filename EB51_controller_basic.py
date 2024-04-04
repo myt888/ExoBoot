@@ -3,6 +3,7 @@ import numpy as np   # Numerical pythonimport math
 import pickle  # Document read/save (record foot sensor file)
 import os  # For document read/save (combined with pickle)
 import gc   # Memory leak clearance
+from collections import deque
 import processor as proc
 import sys
 import csv
@@ -18,7 +19,7 @@ MAX_TORQUE = 30
 NM_PER_AMP = 0.146
 angle_offset = 0.28
 
-ANKLE_LOG_VARS = ['time', 'desire_torque', 'commanded_torque', 'passive_torque', 'ankle_angle', 'device_current']
+ANKLE_LOG_VARS = ['time', 'desire_torque', 'passive_torque', 'commanded_torque', 'ankle_angle', 'angular_speed','device_current']
 
 
 class Controller():
@@ -30,6 +31,10 @@ class Controller():
         self.cf_path = os.path.join('/home/pi/ExoBoot/data_move_trigger', self.cf_name)
         self.cf = open(self.cf_path, 'w', encoding='UTF8', newline='')
         self.writer = csv.writer(self.cf)
+
+        self.num_samples = 100
+        self.prev_angles = deque(maxlen=self.num_samples)
+        self.speed_threshold = 10
 
     def __enter__(self):
         self.dev.update()
@@ -63,6 +68,8 @@ class Controller():
         self.writer.writerow(ANKLE_LOG_VARS)    # Write log header
 
         calibration_angle = self.calibrate_angle()
+        for _ in range(self.num_samples):
+            self.prev_angles.append(calibration_angle)
 
         i = 0
         t0 = time.time()
@@ -78,6 +85,14 @@ class Controller():
             self.dev.update()   # Update
 
             current_angle = self.dev.get_output_angle_degrees() - 90 - angle_offset  # Initial angle set at 90
+            self.prev_angles.append(current_angle)
+
+            angle_diffs = np.diff(np.array(self.prev_angles))
+            if len(angle_diffs) > 0:
+                inst_velocities = angle_diffs / self.dt
+                angular_speed = np.mean(inst_velocities)
+            else:
+                angular_speed = 0
 
             if not synced:
                 des_torque = 0
@@ -87,7 +102,7 @@ class Controller():
             else:
                 des_torque = -5
 
-            passive_torque = proc.get_passive_torque(current_angle)
+            passive_torque = proc.get_passive_torque(current_angle, angular_speed, self.speed_threshold)
             command_torque = min(des_torque - passive_torque, MAX_TORQUE)
             self.dev.set_output_torque_newton_meters(command_torque)
 
@@ -95,7 +110,7 @@ class Controller():
             
             if i % 50 == 0:
                 print("des torque = ", des_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
-            self.writer.writerow([t_curr, des_torque, command_torque, passive_torque, current_angle, qaxis_curr])    
+            self.writer.writerow([t_curr, des_torque, passive_torque, command_torque, current_angle, angular_speed, qaxis_curr])
         print("Controller closed")
 
 if __name__ == '__main__':

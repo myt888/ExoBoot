@@ -30,19 +30,22 @@ function [ pos, time ] = ChrisJIMtraj( trajno )
         pos = a*sin(2*pi*w*(trajectory.time + phaseshift))+b;
         pos(1:padtime/dt) = zeros(size(pos(1:padtime/dt)));
 
+    elseif trajno >= 1 && trajno <= 3
+        if trajno == 1
+            traj_data_path = "traj_data_Katharine.csv";
+        else
+            fileNameSuffix = "";
+            if trajno == 2
+                fileNameSuffix = "_50";
+            elseif trajno == 3
+                fileNameSuffix = "_25";
+            end
+            traj_data_path = strcat('traj_data_Katharine', fileNameSuffix, '.csv');
+        end
 
-    elseif trajno == 1
-        traj_data_path = "I:\My Drive\Locomotor\ExoBoot\JIM_setup\traj_data_Katharine.csv";
-
-        traj_data = csvread(traj_data_path,1,0);
-        traj_data_time = traj_data(:,1);
-        traj_data_angle = traj_data(:,2);
-
-        pos = traj_data_angle;
-        trajectory.time = traj_data_time;
-
-        % figure
-        % plot(trajectory.time(1:3000),pos(1:3000),'LineWidth',1)
+        traj_data = csvread(traj_data_path, 1, 0);
+        trajectory.time = traj_data(:, 1);
+        pos = traj_data(:, 2);
 
     else
         trajectory.time = 0;
