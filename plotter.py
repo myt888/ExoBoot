@@ -161,18 +161,14 @@ def plot_piecewise_fit():
 
 def plot_controller_data():
     csv_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_vel_fit/EB51_vel_fit_EXO_2.csv"
-    mat_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_vel_fit/EB51_vel_fit_EXO_2.mat"
-    cal_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_vel_fit/EB51_vel_fit_CAL.mat"
-    mat_file2 = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_EXO_3.mat"
-    cal_file2 = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_CAL.mat"
-
-    # csv_file = f"I:\My Drive\Locomotor\ExoBoot\data_move_trigger\EB51_move_trigger_EXO_3.csv"
-    # mat_file = f"I:\My Drive\Locomotor\ExoBoot\data_move_trigger\EB51_move_trigger_EXO_3.mat"
-    # cal_file = f"I:\My Drive\Locomotor\ExoBoot\data_move_trigger\EB51_move_trigger_CAL.mat"
+    mat_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_basic_controller/basic_controller_motor_EXO_constant.mat"
+    cal_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_basic_controller/basic_controller_motor_CAL_constant.mat"
+    # mat_file2 = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_EXO_3.mat"
+    # cal_file2 = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_CAL.mat"
 
     JIM_time, JIM_angle, JIM_torque =  load_mat(mat_file, cal_file, False, False)
     JIM_time_filt, JIM_angle_filt, JIM_torque_filt =  load_mat(mat_file, cal_file, False, True)
-    JIM_time_filt2, JIM_angle_filt2, JIM_torque_filt2 =  load_mat(mat_file2, cal_file2, False, True)
+    # JIM_time_filt2, JIM_angle_filt2, JIM_torque_filt2 =  load_mat(mat_file2, cal_file2, False, True)
 
     controller_data = pd.read_csv(csv_file)
 
@@ -183,9 +179,9 @@ def plot_controller_data():
     # plt.scatter(controller_data["ankle_angle"], controller_data["passive_torque"], label='passive', s=2)
     # plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"] + controller_data["passive_torque"], label='output', s=2)
 
-    # plt.scatter(JIM_time, JIM_torque, label='JIM_torque', s=2)
-    plt.scatter(JIM_time_filt, JIM_torque_filt, label='vel_based_passive_torque', s=2)
-    plt.scatter(JIM_time_filt2, JIM_torque_filt2, label='normal_passive_torque', s=2)
+    plt.scatter(JIM_time, JIM_torque, label='JIM_torque', s=2)
+    plt.scatter(JIM_time_filt, JIM_torque_filt, label='filt_JIM_torque', s=2)
+    # plt.scatter(JIM_time_filt2, JIM_torque_filt2, label='normal_passive_torque', s=2)
     # plt.scatter(controller_data["time"], controller_data["ankle_angle"], label='command', s=2)
     # plt.scatter(controller_data["time"], controller_data["commanded_torque"], label='command', s=2)
     # plt.scatter(controller_data["time"], controller_data["passive_torque"], label='passive', s=2)
