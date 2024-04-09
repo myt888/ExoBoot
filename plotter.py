@@ -171,6 +171,7 @@ def plot_controller_data():
     # JIM_time_filt2, JIM_angle_filt2, JIM_torque_filt2 =  load_mat(mat_file2, cal_file2, False, True)
 
     controller_data = pd.read_csv(csv_file)
+    adjusted_time, adjusted_torque = proc.adjusted_data(controller_data["time"], controller_data["desire_torque"], 1000, 0.5)
 
     plt.figure(figsize=(8, 6), dpi=125)
     # plt.scatter(JIM_angle, JIM_torque, label='JIM_torque', s=2)
@@ -179,17 +180,18 @@ def plot_controller_data():
     # plt.scatter(controller_data["ankle_angle"], controller_data["passive_torque"], label='passive', s=2)
     # plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"] + controller_data["passive_torque"], label='output', s=2)
 
-    # plt.scatter(JIM_time, JIM_torque, label='JIM_torque', s=2)
-    # plt.scatter(JIM_time_filt, JIM_torque_filt, label='filt_JIM_torque', s=2)
+    plt.scatter(JIM_time, JIM_torque, label='JIM_torque', s=2)
+    plt.scatter(JIM_time_filt, JIM_torque_filt, label='filt_JIM_torque', s=2)
     # plt.scatter(JIM_time_filt2, JIM_torque_filt2, label='normal_passive_torque', s=2)
     # plt.scatter(controller_data["time"], controller_data["ankle_angle"], label='ankle angle', s=2)
-    plt.scatter(controller_data["time"], controller_data["commanded_torque"], label='command', s=2)
-    plt.scatter(controller_data["time"], controller_data["passive_torque"], label='passive', s=2)
-    plt.scatter(controller_data["time"], controller_data["desire_torque"], label='desire', s=2)
+    # plt.scatter(controller_data["time"], controller_data["commanded_torque"], label='command', s=2)
+    # plt.scatter(controller_data["time"], controller_data["passive_torque"], label='passive', s=2)
+    # plt.scatter(controller_data["time"], controller_data["desire_torque"], label='desire', s=2)
+    plt.scatter(adjusted_time, adjusted_torque, label='desire_torque', s=2)
     # plt.scatter(controller_data["time"], controller_data["angular_speed"], label='angular speed', s=2)
 
     
-    # plt.ylim(-10, 5)
+    # plt.xlim(0, 25)
     # plt.xlabel('Angle [deg]')
     plt.xlabel('Time [s]')
     # plt.ylabel('angular speed [deg/s]')
