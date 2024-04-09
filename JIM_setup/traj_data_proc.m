@@ -72,11 +72,11 @@ acc(end+1)=0;
 
 figure
 plot(reset_times,reset_angles,'LineWidth',1)
-hold on
-plot(reset_times_50,reset_angles,'LineWidth',1)
-hold on
-plot(reset_times_25,reset_angles,'LineWidth',1)
-hold off
+% hold on
+% plot(reset_times_50,reset_angles,'LineWidth',1)
+% hold on
+% plot(reset_times_25,reset_angles,'LineWidth',1)
+% hold off
 xlabel("time [s]")
 ylabel("angle [deg]")
 
