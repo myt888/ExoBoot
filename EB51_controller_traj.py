@@ -18,10 +18,9 @@ from thermal_model import ThermalMotorModel
 
 MAX_TORQUE = 30
 NM_PER_AMP = 0.146
-angle_offset = 0.28
+ANGLE_OFFSET = 0.28
 
 ANKLE_LOG_VARS = ['time', 'desire_torque', 'passive_torque', 'commanded_torque', 'ankle_angle', 'angular_speed','device_current']
-traj_data = pd.read_csv(f'/home/pi/ExoBoot/JIM_setup/traj_data_Katharine.csv')
 
 class Controller():
     def __init__(self, dev, dt):
@@ -33,9 +32,11 @@ class Controller():
         self.cf = open(self.cf_path, 'w', encoding='UTF8', newline='')
         self.writer = csv.writer(self.cf)
 
-        self.num_samples = 100
+        self.num_samples = 50
         self.prev_angles = deque(maxlen=self.num_samples)
-        self.speed_threshold = 10
+        self.speed_threshold = 5
+
+        self.traj_data = pd.read_csv(f'/home/pi/ExoBoot/JIM_setup/traj_data_Katharine.csv')
 
     def __enter__(self):
         self.dev.update()
@@ -54,7 +55,7 @@ class Controller():
         delay = self.dt
 
         for i in range(samples):
-                current_angle = self.dev.get_output_angle_degrees() - 90 - angle_offset
+                current_angle = self.dev.get_output_angle_degrees() - 90 - ANGLE_OFFSET
                 angles.append(current_angle)
                 time.sleep(delay)
                 i += 1
@@ -83,19 +84,13 @@ class Controller():
         for t in loop: 
             t_curr = time.time() - t0 
             
-            i += 1
+            i = i + 1
             self.dev.update()   # Update
 
-            current_angle = self.dev.get_output_angle_degrees() - 90 - angle_offset  # Initial angle set at 90
+            current_angle = self.dev.get_output_angle_degrees() - 90 - ANGLE_OFFSET  # Initial angle set at 90
             self.prev_angles.append(current_angle)
 
             angle_diffs = np.diff(np.array(self.prev_angles))
-
-            # if len(self.prev_angles) == self.num_samples:
-            #     angular_speed = (current_angle - self.prev_angles[0]) / (self.num_samples * self.dt)
-            # else:
-            #     angular_speed = 0
-
             if len(angle_diffs) > 0:
                 inst_velocities = angle_diffs / self.dt
                 angular_speed = np.mean(inst_velocities)
@@ -104,12 +99,12 @@ class Controller():
 
             if not synced:
                 des_torque = 0
-                if abs(current_angle - calibration_angle) > 0.5:
+                if abs(current_angle - calibration_angle) > 1:
                     synced = True
                     print("Synced with JIM device. Start commanding torque.")
             else:
-                if line <= len(traj_data) - 1:
-                    des_torque = traj_data['commanded_torque'][line]    # Read Command Torque
+                if line <= len(self.traj_data) - 1:
+                    des_torque = self.traj_data['commanded_torque'][line]    # Read Command Torque
                 else:
                     des_torque = 0
             
@@ -120,7 +115,7 @@ class Controller():
             qaxis_curr = self.dev.get_current_qaxis_amps()
             
             if i % 50 == 0:
-                print("des torque = ", des_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
+                print("des_torque = ", des_torque, "command_torque = ", command_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
             self.writer.writerow([t_curr, des_torque, passive_torque, command_torque, current_angle, angular_speed, qaxis_curr])
             line += 1
         print("Controller closed")

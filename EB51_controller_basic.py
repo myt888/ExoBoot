@@ -109,12 +109,12 @@ class Controller():
             qaxis_curr = self.dev.get_current_qaxis_amps()
             
             if i % 50 == 0:
-                print("des torque = ", des_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
+                print("des_torque = ", des_torque, "command_torque = ", command_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
             self.writer.writerow([t_curr, des_torque, passive_torque, command_torque, current_angle, angular_speed, qaxis_curr])
         print("Controller closed")
 
 if __name__ == '__main__':
-    dt = 1/200
+    dt = 1/250
     with EB51Man(devttyACMport = '/dev/ttyACM0', whichAnkle = 'right', updateFreq=1000, csv_file_name = "ankle_log.csv", dt = dt) as dev:
         with Controller(dev, dt = dt) as controller:
             controller.control()
