@@ -160,9 +160,9 @@ def plot_piecewise_fit():
 
 
 def plot_controller_data():
-    csv_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_vel_fit/EB51_vel_fit_EXO_2.csv"
-    mat_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_basic_controller/basic_controller_motor_EXO_constant.mat"
-    cal_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_basic_controller/basic_controller_motor_CAL_constant.mat"
+    csv_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_traj_controller/EB51_traj_EXO_1.csv"
+    mat_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_traj_controller/EB51_traj_EXO_1.mat"
+    cal_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_traj_controller/EB51_traj_CAL.mat"
     # mat_file2 = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_EXO_3.mat"
     # cal_file2 = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_CAL.mat"
 
@@ -179,13 +179,13 @@ def plot_controller_data():
     # plt.scatter(controller_data["ankle_angle"], controller_data["passive_torque"], label='passive', s=2)
     # plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"] + controller_data["passive_torque"], label='output', s=2)
 
-    plt.scatter(JIM_time, JIM_torque, label='JIM_torque', s=2)
-    plt.scatter(JIM_time_filt, JIM_torque_filt, label='filt_JIM_torque', s=2)
+    # plt.scatter(JIM_time, JIM_torque, label='JIM_torque', s=2)
+    # plt.scatter(JIM_time_filt, JIM_torque_filt, label='filt_JIM_torque', s=2)
     # plt.scatter(JIM_time_filt2, JIM_torque_filt2, label='normal_passive_torque', s=2)
-    # plt.scatter(controller_data["time"], controller_data["ankle_angle"], label='command', s=2)
-    # plt.scatter(controller_data["time"], controller_data["commanded_torque"], label='command', s=2)
-    # plt.scatter(controller_data["time"], controller_data["passive_torque"], label='passive', s=2)
-    # plt.scatter(controller_data["time"], controller_data["desire_torque"], label='desire', s=2)
+    # plt.scatter(controller_data["time"], controller_data["ankle_angle"], label='ankle angle', s=2)
+    plt.scatter(controller_data["time"], controller_data["commanded_torque"], label='command', s=2)
+    plt.scatter(controller_data["time"], controller_data["passive_torque"], label='passive', s=2)
+    plt.scatter(controller_data["time"], controller_data["desire_torque"], label='desire', s=2)
     # plt.scatter(controller_data["time"], controller_data["angular_speed"], label='angular speed', s=2)
 
     
