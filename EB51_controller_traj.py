@@ -28,7 +28,7 @@ class Controller():
         self.dev = dev
 
         self.cf_name = 'PEA_test_R_{0}.csv'.format(time.strftime("%Y%m%d-%H%M%S"))
-        self.cf_path = os.path.join('/home/pi/ExoBoot/data_traj_controller', self.cf_name)
+        self.cf_path = os.path.join('/home/pi/ExoBoot/data_traj_50%_controller', self.cf_name)
         self.cf = open(self.cf_path, 'w', encoding='UTF8', newline='')
         self.writer = csv.writer(self.cf)
 
@@ -36,7 +36,7 @@ class Controller():
         self.prev_angles = deque(maxlen=self.num_samples)
         self.speed_threshold = 5
 
-        self.traj_data = pd.read_csv(f'/home/pi/ExoBoot/JIM_setup/traj_data_Katharine.csv')
+        self.traj_data = pd.read_csv(f'/home/pi/ExoBoot/JIM_setup/traj_data_Katharine_50.csv')
 
     def __enter__(self):
         self.dev.update()
