@@ -71,19 +71,19 @@ acc(end+1)=0;
 
 
 figure
-plot(reset_times,reset_angles,'LineWidth',1)
+% plot(reset_times,reset_angles,'LineWidth',1)
 % hold on
-% plot(reset_times_50,reset_angles,'LineWidth',1)
+plot(reset_times_50,reset_torques,'LineWidth',1)
 % hold on
 % plot(reset_times_25,reset_angles,'LineWidth',1)
 % hold off
 xlabel("time [s]")
 ylabel("angle [deg]")
 
-figure
-plot(reset_times,reset_torques,'LineWidth',1)
-xlabel("time [s]")
-ylabel("torque [Nm]")
+% figure
+% plot(reset_times,reset_torques,'LineWidth',1)
+% xlabel("time [s]")
+% ylabel("torque [Nm]")
 
 %% Write Data
 output_data = table(reset_times', reset_angles', reset_torques', 'VariableNames', {'time', 'ankle_angle', 'commanded_torque'});
