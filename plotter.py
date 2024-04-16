@@ -159,49 +159,95 @@ def plot_piecewise_fit():
     plt.show()
 
 
-def plot_controller_data():
-    csv_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_traj_50%_controller/EB51_traj_50%_EXO_1.csv"
-    mat_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_traj_50%_controller/EB51_traj_50%_EXO_1.mat"
-    cal_file = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_traj_50%_controller/EB51_traj_50%_CAL_.mat"
-    # mat_file2 = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_EXO_3.mat"
-    # cal_file2 = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_move_trigger/EB51_move_trigger_CAL.mat"
+def load_JIM_controller_avg(dir):
+    EXO_dataframes = []
+    csv_dataframes = []
+    EXO_files = []
+    csv_files = []
 
-    JIM_time, JIM_angle, JIM_torque =  load_mat(mat_file, cal_file, False, False)
-    JIM_time_filt, JIM_angle_filt, JIM_torque_filt =  load_mat(mat_file, cal_file, False, True)
-    # JIM_time_filt2, JIM_angle_filt2, JIM_torque_filt2 =  load_mat(mat_file2, cal_file2, False, True)
+    files = os.listdir(dir)
+    for file in files:
+        if "CAL.mat" in file:
+            CAL_file = file
+        elif "EXO_" in file and file.endswith('.mat'):
+            EXO_files.append(file)
+        elif "EXO_" in file and file.endswith('.csv'):
+            csv_files.append(file)
 
-    controller_data = pd.read_csv(csv_file)
-    adjusted_time, adjusted_torque = proc.adjusted_data(controller_data["time"], controller_data["desire_torque"], 1000, 0.5)
-
-    plt.figure(figsize=(8, 6), dpi=125)
-    # plt.scatter(JIM_angle, JIM_torque, label='JIM_torque', s=2)
-    # plt.scatter(JIM_angle_filt, JIM_torque_filt, label='JIM_filtered', s=2)
-    # plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"], label='command', s=2)
-    # plt.scatter(controller_data["ankle_angle"], controller_data["passive_torque"], label='passive', s=2)
-    # plt.scatter(controller_data["ankle_angle"], controller_data["commanded_torque"] + controller_data["passive_torque"], label='output', s=2)
-
-    # plt.scatter(JIM_time, JIM_torque, label='JIM_torque', s=2)
-    # plt.scatter(JIM_time_filt, JIM_torque_filt, label='filt_JIM_torque', s=2)
-    # plt.scatter(JIM_time_filt2, JIM_torque_filt2, label='normal_passive_torque', s=2)
-    # plt.scatter(controller_data["time"], controller_data["ankle_angle"], label='ankle angle', s=2)
-    plt.scatter(controller_data["time"], controller_data["commanded_torque"], label='command', s=2)
-    plt.scatter(controller_data["time"], controller_data["passive_torque"], label='passive', s=2)
-    plt.scatter(controller_data["time"], controller_data["desire_torque"], label='desire', s=2)
-    # plt.scatter(adjusted_time, adjusted_torque, label='desire_torque', s=2)
-    # plt.scatter(controller_data["time"], controller_data["angular_speed"], label='angular speed', s=2)
-
+    if not CAL_file:
+        raise FileNotFoundError("No CAL file found in the directory.")
     
-    # plt.xlim(0, 25)
-    # plt.xlabel('Angle [deg]')
-    plt.xlabel('Time [s]')
-    # plt.ylabel('angular speed [deg/s]')
-    plt.ylabel('Torque [Nm]')
-    # plt.ylabel('Angle [deg]')
+    for EXO_file in EXO_files:
+        file_path_JIM_cal = os.path.join(dir, CAL_file)
+        file_path_JIM = os.path.join(dir, EXO_file)
+        JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM, file_path_JIM_cal, adjust=False, lpf=True)
 
-    plt.grid(True)
+        df = pd.DataFrame({
+            'Time': JIM_time,
+            'Angle': JIM_angle,
+            'Torque': JIM_torque
+        }).set_index('Time')
+        EXO_dataframes.append(df)
+
+    for csv_file in csv_files:
+        file_path_csv = os.path.join(dir, csv_file)
+        controller_data = pd.read_csv(file_path_csv)
+
+        controller_data['time'] = pd.to_datetime(controller_data['time'], unit='s')
+        controller_data.set_index('time', inplace=True)
+
+        controller_data_resampled = controller_data.resample('0.004S').mean().interpolate()
+
+        adjusted_time, adjusted_torque = proc.adjusted_data(controller_data_resampled.index, controller_data_resampled["desire_torque"], 1000, 0.5)
+       
+        df = pd.DataFrame({
+            'Time': adjusted_time,
+            'Torque': adjusted_torque
+        }).set_index('Time')
+
+        csv_dataframes.append(df)
+
+    EXO_combined_df = pd.concat(EXO_dataframes, axis=1)
+    csv_combined_df = pd.concat(csv_dataframes, axis=1)
+
+    EXO_combined_df = pd.DataFrame({
+        'Angle': EXO_combined_df.filter(like='Angle').mean(axis=1),
+        'Torque': EXO_combined_df.filter(like='Torque').mean(axis=1)
+    })
+    EXO_combined_df.reset_index(inplace=True)
+
+    csv_combined_df = pd.DataFrame({
+        'Torque': csv_combined_df.mean(axis=1)
+    })
+    csv_combined_df.reset_index(inplace=True)
+    csv_combined_df['Time'] = (csv_combined_df['Time'] - csv_combined_df['Time'][0]) / pd.Timedelta('1s')
+
+    return EXO_combined_df, csv_combined_df
+
+
+def plot_JIM_vs_controller(EXO_data, csv_data):
+    plt.figure(figsize=(8, 6), dpi=125)
+
+    plt.scatter(EXO_data['Time'], EXO_data['Torque'], label='JIM torque', s=1)
+    plt.plot(csv_data['Time'], csv_data['Torque'], label='controller torque', color='red')
+
+    plt.xlim(0, 25)
+    plt.xlabel('Time (s)')
+    plt.ylabel('Torque (Nm)')
     plt.legend()
+    plt.grid(True)
     plt.show()
 
 
-if __name__ == '__main__':
-    plot_controller_data()
+dir_path = "I:/My Drive/Locomotor/ExoBoot/data_traj_100%_controller/"
+JIM_data_avg, controller_data_avg = load_JIM_controller_avg(dir_path)
+plot_JIM_vs_controller(JIM_data_avg, controller_data_avg)
+
+# if __name__ == '__main__':
+
+#     plt.scatter(JIM_data["Time"], JIM_data["Torque"], label='torque', s=2)
+#     plt.grid(True)
+#     plt.legend()
+#     plt.show()
+
+    

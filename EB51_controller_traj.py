@@ -105,7 +105,7 @@ class Controller():
                     print("Synced with JIM device. Start commanding torque.")
             else:
                 if line <= len(self.traj_data) - 1:
-                    des_torque = self.traj_data['commanded_torque'][line]    # Read Command Torque
+                    des_torque = self.traj_data['commanded_torque'][line]
                 else:
                     des_torque = 0
             
