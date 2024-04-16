@@ -242,12 +242,3 @@ def plot_JIM_vs_controller(EXO_data, csv_data):
 dir_path = "I:/My Drive/Locomotor/ExoBoot/data_traj_100%_controller/"
 JIM_data_avg, controller_data_avg = load_JIM_controller_avg(dir_path)
 plot_JIM_vs_controller(JIM_data_avg, controller_data_avg)
-
-# if __name__ == '__main__':
-
-#     plt.scatter(JIM_data["Time"], JIM_data["Torque"], label='torque', s=2)
-#     plt.grid(True)
-#     plt.legend()
-#     plt.show()
-
-    

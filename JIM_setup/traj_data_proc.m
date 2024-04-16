@@ -33,8 +33,13 @@ reset_angles(1) = 0;
 reset_angles(end) = 0;
 
 %% Slow down
-reset_times_50 = reset_times*2;
-reset_times_25 = reset_times*4;
+reset_times_50 = linspace(reset_times(1), reset_times(end)*2, round((reset_times(end)/period)+1));
+reset_angles_50 = interp1(reset_times, reset_angles, reset_times_50);
+reset_torques_50 = interp1(reset_times, reset_torques, reset_times_50);
+
+reset_times_25 = linspace(reset_times(1), reset_times(end)*4, round((reset_times(end)/period)+1));
+reset_angles_25 = interp1(reset_times, reset_angles, reset_times_25);
+reset_torques_25 = interp1(reset_times, reset_torques, reset_times_25);
 
 %% Speed & Acc
 speed = diff(reset_angles)/(period);
@@ -47,51 +52,30 @@ acc(end+1)=0;
 acc(end+1)=0;
 
 %% Plotting
-% figure
-% plot(traj_data.Time,traj_data.AnkleAngle,'LineWidth',1)
-% xlabel("time [s]")
-% ylabel("angle [deg]")
-
-% figure
-% plot(new_times,new_torque,'LineWidth',1)
-% hold on
-% plot(new_times,filtered_torques,'LineWidth',1)
-% hold off
-% xlabel("time [s]")
-% ylabel("torque [Nm]")
-
-% figure
-% scatter(new_times,new_angles,'LineWidth',1)
-% hold on
-% scatter(new_times,filtered_angles,'LineWidth',1)
-% hold off
-% legend('Data','Filtered')
-% xlabel("time [s]")
-% ylabel("angle [deg]")
-
-
 figure
 % plot(reset_times,reset_angles,'LineWidth',1)
 % hold on
-plot(reset_times_50,reset_torques,'LineWidth',1)
+plot(reset_times_50, reset_torques_50, 'LineWidth', 1)
 % hold on
 % plot(reset_times_25,reset_angles,'LineWidth',1)
 % hold off
 xlabel("time [s]")
-ylabel("angle [deg]")
+% ylabel("angle [deg]")
 
 % figure
 % plot(reset_times,reset_torques,'LineWidth',1)
 % xlabel("time [s]")
-% ylabel("torque [Nm]")
+ylabel("torque [Nm]")
 
 %% Write Data
 output_data = table(reset_times', reset_angles', reset_torques', 'VariableNames', {'time', 'ankle_angle', 'commanded_torque'});
 output_path = "traj_data_Katharine.csv";
 writetable(output_data, output_path);
+
 output_data_50 = table(reset_times_50', reset_angles', reset_torques', 'VariableNames', {'time', 'ankle_angle', 'commanded_torque'});
 output_path_50 = "traj_data_Katharine_50.csv";
 writetable(output_data_50, output_path_50);
+
 output_data_25 = table(reset_times_25', reset_angles', reset_torques', 'VariableNames', {'time', 'ankle_angle', 'commanded_torque'});
 output_path_25 = "traj_data_Katharine_25.csv";
 writetable(output_data_25, output_path_25);
