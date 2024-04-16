@@ -224,18 +224,30 @@ def load_JIM_controller_avg(dir):
     return EXO_combined_df, csv_combined_df
 
 
-def plot_JIM_vs_controller(EXO_data, csv_data):
-    plt.figure(figsize=(8, 6), dpi=125)
+def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
+    if PI == False:
+        plt.figure(figsize=(8, 6), dpi=125)
 
-    plt.scatter(EXO_data['Time'], EXO_data['Torque'], label='JIM torque', s=1)
-    plt.plot(csv_data['Time'], csv_data['Torque'], label='controller torque', color='red')
+        plt.scatter(EXO_data['Time'], EXO_data['Torque'], label='JIM torque', s=1)
+        plt.plot(csv_data['Time'], csv_data['Torque'], label='controller torque', color='red')
 
-    plt.xlim(0, 25)
-    plt.xlabel('Time (s)')
-    plt.ylabel('Torque (Nm)')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+        plt.xlim(0, 25)
+        plt.xlabel('Time (s)')
+        plt.ylabel('Torque (Nm)')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+    else:
+        plt.figure(figsize=(8, 6), dpi=125)
+
+        plt.scatter(EXO_data['Time'], EXO_data['Torque'], label='JIM torque', s=1)
+
+        plt.xlim(0, 25)
+        plt.xlabel('Time (s)')
+        plt.ylabel('Torque (Nm)')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
 
 
 dir_path = "I:/My Drive/Locomotor/ExoBoot/data_traj_100%_controller/"
