@@ -204,7 +204,6 @@ def load_JIM_controller_avg(dir):
             'Time': adjusted_time,
             'Torque': adjusted_torque
         }).set_index('Time')
-
         csv_dataframes.append(df)
 
     EXO_combined_df = pd.concat(EXO_dataframes, axis=1)
