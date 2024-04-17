@@ -198,11 +198,12 @@ def load_JIM_controller_avg(dir):
 
         controller_data_resampled = controller_data.resample('0.004S').mean().interpolate()
 
-        adjusted_time, adjusted_torque = proc.adjusted_data(controller_data_resampled.index, controller_data_resampled["desire_torque"], 1000, 0.5)
-       
+        _, _, start_index = proc.adjusted_data(controller_data_resampled.index, controller_data_resampled["desire_torque"], 1000, 0.5)
         df = pd.DataFrame({
-            'Time': adjusted_time,
-            'Torque': adjusted_torque
+            'Time': controller_data_resampled.index[start_index:]-controller_data_resampled.index[start_index],
+            'Desire Torque': controller_data_resampled["desire_torque"][start_index:],
+            'Coommanded Torque': controller_data_resampled["commanded_torque"][start_index:],
+            'Passive Torque': controller_data_resampled["passive_torque"][start_index:]
         }).set_index('Time')
         csv_dataframes.append(df)
 
@@ -216,7 +217,9 @@ def load_JIM_controller_avg(dir):
     EXO_combined_df.reset_index(inplace=True)
 
     csv_combined_df = pd.DataFrame({
-        'Torque': csv_combined_df.mean(axis=1)
+        'Desire Torque': csv_combined_df.filter(like='Desire Torque').mean(axis=1),
+        'Coommanded Torque': csv_combined_df.filter(like='Coommanded Torque').mean(axis=1),
+        'Passive Torque': csv_combined_df.filter(like='Passive Torque').mean(axis=1),
     })
     csv_combined_df.reset_index(inplace=True)
     csv_combined_df['Time'] = (csv_combined_df['Time'] - csv_combined_df['Time'][0]) / pd.Timedelta('1s')
@@ -229,9 +232,9 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
         plt.figure(figsize=(8, 6), dpi=125)
 
         plt.scatter(EXO_data['Time'], EXO_data['Torque'], label='JIM torque', s=1)
-        plt.plot(csv_data['Time'], csv_data['Torque'], label='controller torque', color='red')
+        plt.scatter(csv_data['Time'], csv_data['Desire Torque'], label='controller torque', color='red', s=1)
 
-        plt.xlim(0, 25)
+        plt.xlim(0, 20)
         plt.xlabel('Time (s)')
         plt.ylabel('Torque (Nm)')
         plt.legend()
@@ -240,9 +243,12 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
     else:
         plt.figure(figsize=(8, 6), dpi=125)
 
-        plt.scatter(EXO_data['Time'], EXO_data['Torque'], label='JIM torque', s=1)
+        plt.scatter(csv_data['Time'], csv_data['Desire Torque'], label='desire torque', s=1)
+        plt.scatter(csv_data['Time'], csv_data['Passive Torque'], label='passive torque', s=1)
+        plt.scatter(csv_data['Time'], csv_data['Coommanded Torque'], label='commanded torque', s=1)
 
-        plt.xlim(0, 25)
+        plt.xlim(0, 20)
+        plt.ylim(0, 10)
         plt.xlabel('Time (s)')
         plt.ylabel('Torque (Nm)')
         plt.legend()
@@ -252,4 +258,4 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
 
 dir_path = "I:/My Drive/Locomotor/ExoBoot/data_traj_100%_controller/"
 JIM_data_avg, controller_data_avg = load_JIM_controller_avg(dir_path)
-plot_JIM_vs_controller(JIM_data_avg, controller_data_avg)
+plot_JIM_vs_controller(JIM_data_avg, controller_data_avg, PI=True)

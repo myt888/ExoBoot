@@ -14,7 +14,7 @@ def adjusted_data(x, y, initial_average_range, threshold):
 
     adjusted_time = [t - x[start_index] for t in x[start_index:]]
     adjusted_angle = y[start_index:]
-    return adjusted_time, adjusted_angle
+    return adjusted_time, adjusted_angle, start_index
 
 
 def fft(time, data):

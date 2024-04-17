@@ -110,7 +110,12 @@ class Controller():
                     des_torque = 0
             
             passive_torque = proc.get_passive_torque(current_angle, angular_speed, self.speed_threshold)
-            command_torque = -min(abs(des_torque - passive_torque), MAX_TORQUE)
+
+            if command_torque < 0:
+                command_torque = -min(abs(des_torque - passive_torque), MAX_TORQUE)
+            else:
+                command_torque = 0
+            
             self.dev.set_output_torque_newton_meters(command_torque)
 
             qaxis_curr = self.dev.get_current_qaxis_amps()
