@@ -235,7 +235,7 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
         plt.scatter(csv_data['Time'], csv_data['Desire Torque'], label='controller torque', color='red', s=1)
 
         plt.xlim(0, 20)
-        plt.ylim(-25, 5)
+        plt.ylim(-30, 5)
         plt.xlabel('Time (s)')
         plt.ylabel('Torque (Nm)')
         plt.legend()
@@ -249,7 +249,7 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
         plt.scatter(csv_data['Time'], csv_data['Coommanded Torque'], label='commanded torque', s=1)
 
         plt.xlim(0, 20)
-        plt.ylim(-25, 5)
+        plt.ylim(-30, 5)
         plt.xlabel('Time (s)')
         plt.ylabel('Torque (Nm)')
         plt.legend()
@@ -257,6 +257,6 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
         plt.show()
 
 
-dir_path = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/data_traj_pos_lim_-0.5"
+dir_path = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/traj_pos_lim_-0.5"
 JIM_data_avg, controller_data_avg = load_JIM_controller_avg(dir_path)
 plot_JIM_vs_controller(JIM_data_avg, controller_data_avg, PI=True)
