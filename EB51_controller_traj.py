@@ -36,7 +36,7 @@ class Controller():
         self.prev_angles = deque(maxlen=self.num_samples)
         self.speed_threshold = 5
 
-        self.traj_data = pd.read_csv(f'/home/pi/ExoBoot/JIM_setup/traj_data_Katharine_50.csv')
+        self.traj_data = pd.read_csv(f'/home/pi/ExoBoot/JIM_setup/traj_data_Katharine.csv')
 
 
     def __enter__(self):
