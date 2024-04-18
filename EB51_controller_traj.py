@@ -73,7 +73,7 @@ class Controller():
     def update_output_torque(self, des_torque, passive_torque):
         potential_torque = des_torque - passive_torque
         
-        command_torque = potential_torque if potential_torque < 0 else 0
+        command_torque = potential_torque if potential_torque < 0 else -0.1
         command_torque = max(command_torque, -MAX_TORQUE)
 
         return command_torque
