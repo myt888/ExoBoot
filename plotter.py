@@ -257,6 +257,6 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
         plt.show()
 
 
-dir_path = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data_traj_pos_lim"
+dir_path = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/data_traj_pos_lim_-0.5"
 JIM_data_avg, controller_data_avg = load_JIM_controller_avg(dir_path)
 plot_JIM_vs_controller(JIM_data_avg, controller_data_avg, PI=True)
