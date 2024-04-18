@@ -28,7 +28,7 @@ class Controller():
         self.dev = dev
 
         self.cf_name = 'PEA_test_R_{0}.csv'.format(time.strftime("%Y%m%d-%H%M%S"))
-        self.cf_path = os.path.join('/home/pi/ExoBoot/data_traj_50%_controller', self.cf_name)
+        self.cf_path = os.path.join('/home/pi/ExoBoot/data_traj_pos_lim', self.cf_name)
         self.cf = open(self.cf_path, 'w', encoding='UTF8', newline='')
         self.writer = csv.writer(self.cf)
 
@@ -38,13 +38,16 @@ class Controller():
 
         self.traj_data = pd.read_csv(f'/home/pi/ExoBoot/JIM_setup/traj_data_Katharine_50.csv')
 
+
     def __enter__(self):
         self.dev.update()
         return self
 
+
     def __exit__(self, exc_type, exc_value, tb):
         self.cf.close()
         print("exiting")
+
 
     def calibrate_angle(self, samples = 1000):
         self.dev.realign_calibration()
@@ -66,6 +69,16 @@ class Controller():
         print(f"calibration complete. start angle: {calibration_angle:.3f} deg")
         return calibration_angle
     
+
+    def update_output_torque(self, des_torque, passive_torque):
+        potential_torque = des_torque - passive_torque
+        
+        command_torque = potential_torque if potential_torque < 0 else 0
+        command_torque = max(command_torque, -MAX_TORQUE)
+
+        return command_torque
+    
+
     def control(self):
         self.writer.writerow(ANKLE_LOG_VARS)
 
@@ -110,12 +123,7 @@ class Controller():
                     des_torque = 0
             
             passive_torque = proc.get_passive_torque(current_angle, angular_speed, self.speed_threshold)
-
-            if command_torque < 0:
-                command_torque = -min(abs(des_torque - passive_torque), MAX_TORQUE)
-            else:
-                command_torque = 0
-            
+            command_torque = self.update_output_torque(des_torque, passive_torque)
             self.dev.set_output_torque_newton_meters(command_torque)
 
             qaxis_curr = self.dev.get_current_qaxis_amps()
