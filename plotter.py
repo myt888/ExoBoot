@@ -198,7 +198,7 @@ def load_JIM_controller_avg(dir):
 
         controller_data_resampled = controller_data.resample('0.004S').mean().interpolate()
 
-        _, _, start_index = proc.adjusted_data(controller_data_resampled.index, controller_data_resampled["desire_torque"], 1000, 0.5)
+        _, _, start_index = proc.adjusted_data(controller_data_resampled.index, controller_data_resampled["desire_torque"], 1000, 2)
         df = pd.DataFrame({
             'Time': controller_data_resampled.index[start_index:]-controller_data_resampled.index[start_index],
             'Desire Torque': controller_data_resampled["desire_torque"][start_index:],
@@ -257,6 +257,6 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
         plt.show()
 
 
-dir_path = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/traj_controller"
+dir_path = "/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/traj_controller_2"
 JIM_data_avg, controller_data_avg = load_JIM_controller_avg(dir_path)
 plot_JIM_vs_controller(JIM_data_avg, controller_data_avg, PI=False)
