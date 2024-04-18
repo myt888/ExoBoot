@@ -28,7 +28,7 @@ class Controller():
         self.dev = dev
 
         self.cf_name = 'PEA_test_R_{0}.csv'.format(time.strftime("%Y%m%d-%H%M%S"))
-        self.cf_path = os.path.join('/home/pi/ExoBoot/data/data_traj_pos_lim_-0.5', self.cf_name)
+        self.cf_path = os.path.join('/home/pi/ExoBoot/data/traj_pos_lim_-0.2', self.cf_name)
         self.cf = open(self.cf_path, 'w', encoding='UTF8', newline='')
         self.writer = csv.writer(self.cf)
 
@@ -73,7 +73,7 @@ class Controller():
     def update_output_torque(self, des_torque, passive_torque):
         potential_torque = des_torque - passive_torque
         
-        command_torque = potential_torque if potential_torque < 0 else -0.5
+        command_torque = potential_torque if potential_torque < -0.5 else -0.5
         command_torque = max(command_torque, -MAX_TORQUE)
 
         return command_torque
