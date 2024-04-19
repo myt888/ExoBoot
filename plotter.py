@@ -186,7 +186,7 @@ def load_JIM_controller_avg(dir):
                            'Angle': JIM_angle,
                            'Torque': JIM_torque}).set_index('Time')
         EXO_dataframes.append(df)
-        print(df.head())
+        print(len(df.index))
 
     # Combine controller data
     for csv_file in csv_files:
@@ -215,7 +215,9 @@ def load_JIM_controller_avg(dir):
                                'Coommanded Torque': csv_combined_df.filter(like='Coommanded Torque').mean(axis=1),
                                'Passive Torque': csv_combined_df.filter(like='Passive Torque').mean(axis=1)}).reset_index()
     csv_avg_df['Time'] = (csv_avg_df['Time'] - csv_avg_df['Time'][0]) / pd.Timedelta('1s')   # Set the time back to float
-    print(EXO_avg_df)
+
+    print("Combined EXO dataframe shape:", EXO_combined_df.shape)
+    print("Combined CSV dataframe shape:", csv_combined_df.shape)
     return EXO_avg_df, csv_avg_df
 
 
@@ -247,16 +249,16 @@ JIM_data_avg, controller_data_avg = load_JIM_controller_avg(dir_path)
 # dir_path_t = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_pos_lim_-0.5"
 # JIM_data_avg_t, controller_data_avg_t = load_JIM_controller_avg(dir_path_t)
 
-# plt.figure(figsize=(8, 6), dpi=125)
+plt.figure(figsize=(8, 6), dpi=125)
 
 # plt.scatter(JIM_data_avg['Time'], JIM_data_avg['Torque'], label='without threshold', s=1)
 # plt.scatter(JIM_data_avg_t['Time'], JIM_data_avg_t['Torque'], label='with threshold', color='green', s=1)
 # plt.scatter(controller_data_avg_t['Time'], controller_data_avg_t['Desire Torque'], label='controller torque', color='red', s=1)
-
+plt.scatter(JIM_data_avg.index, JIM_data_avg[['Time']])
 # plt.xlim(0, 20)
 # plt.ylim(-30, 5)
-# plt.xlabel('Time (s)')
-# plt.ylabel('Torque (Nm)')
-# plt.legend()
-# plt.grid(True)
-# plt.show()
+plt.xlabel('Time (s)')
+plt.ylabel('Torque (Nm)')
+plt.legend()
+plt.grid(True)
+plt.show()
