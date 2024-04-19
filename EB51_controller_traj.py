@@ -73,9 +73,9 @@ class Controller():
     def update_output_torque(self, des_torque, passive_torque):
         potential_torque = des_torque - passive_torque
         
-        # command_torque = potential_torque if potential_torque < -0.5 else -0.5
-        # command_torque = max(command_torque, -MAX_TORQUE)
-        command_torque = max(potential_torque, -MAX_TORQUE)
+        command_torque = potential_torque if potential_torque < -0.5 else -0.5  # Threshold
+        command_torque = max(command_torque, -MAX_TORQUE)
+        # command_torque = max(potential_torque, -MAX_TORQUE)
 
         return command_torque
     
@@ -120,8 +120,11 @@ class Controller():
             else:
                 if line <= len(self.traj_data) - 1:
                     des_torque = self.traj_data['commanded_torque'][line]
+                    # All-negative torque trajectory
+                    # if des_torque>0:
+                    #     des_torque = 0
                 else:
-                    des_torque = 0
+                    des_torque = 0  # Set to 0 after finish the trajectory
             
             passive_torque = proc.get_passive_torque(current_angle, angular_speed, self.speed_threshold)
             command_torque = self.update_output_torque(des_torque, passive_torque)
@@ -130,7 +133,7 @@ class Controller():
             qaxis_curr = self.dev.get_current_qaxis_amps()
             
             if i % 50 == 0:
-                print("des_torque = ", des_torque, "command_torque = ", command_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
+                print("des_torque = ", des_torque, "commanded_torque = ", command_torque, ", passive_torque = ", passive_torque, ", ankle angle = ", current_angle)
             self.writer.writerow([t_curr, des_torque, passive_torque, command_torque, current_angle, angular_speed, qaxis_curr])
             line += 1
         print("Controller closed")
