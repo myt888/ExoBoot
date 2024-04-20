@@ -180,13 +180,21 @@ def load_JIM_controller_avg(dir):
         raise FileNotFoundError("No CAL file in the directory.")
     
     # Combine JIM data
+    first_time_vector = None
     for EXO_file in EXO_files:
-        JIM_time, JIM_angle, JIM_torque = load_mat(os.path.join(dir, EXO_file), os.path.join(dir, CAL_file), adjust=False, lpf=True, cutoff=7, fs=220)
+        JIM_time, JIM_angle, JIM_torque = load_mat(os.path.join(dir, EXO_file), os.path.join(dir, CAL_file), adjust=False, lpf=True, cutoff=6, fs=220)
         df = pd.DataFrame({'Time': JIM_time,
                            'Angle': JIM_angle,
                            'Torque': JIM_torque}) #.set_index('Time')
         EXO_dataframes.append(df)
-        print(len(df.index))
+
+        if first_time_vector is None:
+            first_time_vector = JIM_time
+        else:
+            # Check if current time vector matches the first one
+            if not np.array_equal(first_time_vector, JIM_time):
+                all_times_match = False
+                print(f"Time data mismatch found in file: {EXO_file}")
 
     # Combine controller data
     for csv_file in csv_files:
@@ -197,7 +205,7 @@ def load_JIM_controller_avg(dir):
 
         controller_data_resampled = controller_data.resample('0.004S').mean().interpolate()
 
-        _, _, start_index = proc.adjusted_data(controller_data_resampled.index, controller_data_resampled["desire_torque"], 1000, 1)    # Adjust the starting point
+        _, _, start_index = proc.adjusted_data(controller_data_resampled.index, controller_data_resampled["desire_torque"], 1000, 2)    # Adjust the starting point
         df = pd.DataFrame({'Time': controller_data_resampled.index[start_index:]-controller_data_resampled.index[start_index],
                            'Desire Torque': controller_data_resampled["desire_torque"][start_index:],
                            'Coommanded Torque': controller_data_resampled["commanded_torque"][start_index:],
@@ -217,8 +225,8 @@ def load_JIM_controller_avg(dir):
                                'Passive Torque': csv_combined_df.filter(like='Passive Torque').mean(axis=1)}).reset_index()
     csv_avg_df['Time'] = (csv_avg_df['Time'] - csv_avg_df['Time'][0]) / pd.Timedelta('1s')   # Set the time back to float
 
-    print("Combined EXO dataframe shape:", EXO_combined_df.shape)
-    print("Combined CSV dataframe shape:", csv_combined_df.shape)
+    # print("Combined EXO dataframe shape:", EXO_combined_df.shape)
+    # print("Combined CSV dataframe shape:", csv_combined_df.shape)
     return EXO_avg_df, csv_avg_df
 
 
@@ -247,21 +255,24 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
 
 dir_path = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_controller_2"
 JIM_data_avg, controller_data_avg = load_JIM_controller_avg(dir_path)
-dir_path_t = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_pos_lim_-0.5"
-JIM_data_avg_t, controller_data_avg_t = load_JIM_controller_avg(dir_path_t)
 
-plt.figure(figsize=(8, 6), dpi=125)
+plot_JIM_vs_controller(JIM_data_avg, controller_data_avg, PI=False)
 
-plt.scatter(JIM_data_avg['Time'], JIM_data_avg['Torque'], label='without threshold', s=1)
-plt.scatter(JIM_data_avg_t['Time'], JIM_data_avg_t['Torque'], label='with threshold', color='green', s=1)
-plt.scatter(controller_data_avg_t['Time'], controller_data_avg_t['Desire Torque'], label='controller torque', color='red', s=1)
+# dir_path_t = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_pos_lim_-0.5"
+# JIM_data_avg_t, controller_data_avg_t = load_JIM_controller_avg(dir_path_t)
 
-# plt.scatter(JIM_data_avg.index, JIM_data_avg[['Time']])
+# plt.figure(figsize=(8, 6), dpi=125)
 
-plt.xlim(0, 20)
-plt.ylim(-30, 5)
-plt.xlabel('Time (s)')
-plt.ylabel('Torque (Nm)')
-plt.legend()
-plt.grid(True)
-plt.show()
+# plt.scatter(JIM_data_avg['Time'], JIM_data_avg['Torque'], label='without threshold', s=1)
+# plt.scatter(JIM_data_avg_t['Time'], JIM_data_avg_t['Torque'], label='with threshold', color='green', s=1)
+# plt.scatter(controller_data_avg_t['Time'], controller_data_avg_t['Desire Torque'], label='controller torque', color='red', s=1)
+
+# # plt.scatter(JIM_data_avg.index, JIM_data_avg[['Time']])
+
+# plt.xlim(0, 20)
+# plt.ylim(-30, 5)
+# plt.xlabel('Time (s)')
+# plt.ylabel('Torque (Nm)')
+# plt.legend()
+# plt.grid(True)
+# plt.show()
