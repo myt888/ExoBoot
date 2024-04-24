@@ -28,7 +28,7 @@ class Controller():
         self.dev = dev
 
         self.cf_name = 'PEA_test_R_{0}.csv'.format(time.strftime("%Y%m%d-%H%M%S"))
-        self.cf_path = os.path.join('/home/pi/ExoBoot/data/traj_neg_torque', self.cf_name)
+        self.cf_path = os.path.join('/home/pi/ExoBoot/data/traj_controller_2', self.cf_name)
         self.cf = open(self.cf_path, 'w', encoding='UTF8', newline='')
         self.writer = csv.writer(self.cf)
 
@@ -121,13 +121,12 @@ class Controller():
                 if line <= len(self.traj_data) - 1:
                     des_torque = self.traj_data['commanded_torque'][line]
                     # All-negative torque trajectory
-                    if des_torque>0:
-                        des_torque = 0
+                    # if des_torque>0:
+                    #     des_torque = 0
                 else:
                     des_torque = 0  # Set to 0 after finish the trajectory
             
-            # passive_torque = proc.get_passive_torque(current_angle, angular_speed, self.speed_threshold)  # Get Passive Torque
-            passive_torque = 0  # No PEA
+            passive_torque = proc.get_passive_torque(current_angle, angular_speed, self.speed_threshold)
             command_torque = self.update_output_torque(des_torque, passive_torque)
             self.dev.set_output_torque_newton_meters(command_torque)
 
