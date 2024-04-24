@@ -243,6 +243,6 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
     plt.show()
 
 
-dir_path = f"/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/traj_neg_torque_PEA"
+dir_path = f"/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/traj_neg_torque"
 JIM_data_avg, controller_data_avg = load_JIM_controller_avg(dir_path)
-plot_JIM_vs_controller(JIM_data_avg, controller_data_avg, PI=False)
+plot_JIM_vs_controller(JIM_data_avg, controller_data_avg, PI=True)
