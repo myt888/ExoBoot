@@ -182,7 +182,7 @@ def load_JIM_controller_avg(dir):
     # Combine JIM data
     first_time_vector = None
     for EXO_file in EXO_files:
-        JIM_time, JIM_angle, JIM_torque = load_mat(os.path.join(dir, EXO_file), os.path.join(dir, CAL_file), adjust=False, lpf=True, cutoff=6, fs=227)
+        JIM_time, JIM_angle, JIM_torque = load_mat(os.path.join(dir, EXO_file), os.path.join(dir, CAL_file), adjust=False, lpf=True, cutoff=7, fs=227)
         df = pd.DataFrame({'Time': pd.to_timedelta(JIM_time, unit='s'),
                            'Angle': JIM_angle,
                            'Torque': JIM_torque}).set_index('Time')
@@ -235,7 +235,7 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
         plt.scatter(csv_data['Time'], csv_data['Coommanded Torque'], label='commanded torque', s=1)
 
     plt.xlim(0, 20)
-    plt.ylim(-30, 5)
+    # plt.ylim(-30, 5)
     plt.xlabel('Time (s)')
     plt.ylabel('Torque (Nm)')
     plt.legend()
@@ -243,6 +243,23 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
     plt.show()
 
 
-dir_path = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_controller_2"
+dir_path = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_neg_torque"
+dir_path_PEA = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_neg_torque_PEA"
 JIM_data_avg, controller_data_avg = load_JIM_controller_avg(dir_path)
-plot_JIM_vs_controller(JIM_data_avg, controller_data_avg)
+JIM_data_avg_PEA, controller_data_avg_PEA = load_JIM_controller_avg(dir_path_PEA)
+
+plt.figure(figsize=(8, 6), dpi=125)
+
+plt.scatter(JIM_data_avg['Time'], JIM_data_avg['Torque'], label='JIM torque', s=1)
+plt.scatter(JIM_data_avg_PEA['Time'], JIM_data_avg_PEA['Torque'], label='JIM torque (PEA)', color='green', s=1)
+plt.scatter(controller_data_avg['Time'], controller_data_avg['Desire Torque'], label='controller torque', color='red', s=1)
+
+plt.xlim(0, 20)
+# plt.ylim(-30, 5)
+plt.xlabel('Time (s)')
+plt.ylabel('Torque (Nm)')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# plot_JIM_vs_controller(JIM_data_avg, controller_data_avg, PI=True)
