@@ -59,6 +59,7 @@ def calculate_fit_quality(y, y_fit):
     rmse = np.sqrt(mean_squared_error(y, y_fit))
 
     print(f"Fit Quality: R² = {r2:.3f}, RMSE = {rmse:.3f}")
+    return r2, rmse
 
 
 def piecewise_fit(x_data, y_data):
