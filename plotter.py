@@ -217,6 +217,7 @@ def load_JIM_controller_avg(dir):
                                'Coommanded Torque': csv_combined_df.filter(like='Coommanded Torque').mean(axis=1),
                                'Passive Torque': csv_combined_df.filter(like='Passive Torque').mean(axis=1)}).reset_index()
     csv_avg_df['Time'] = (csv_avg_df['Time'] - csv_avg_df['Time'][0]) / pd.Timedelta('1s')   # Set the time back to float
+    csv_avg_df = csv_avg_df[:len(EXO_avg_df)]
 
     return EXO_avg_df, csv_avg_df
 
@@ -234,7 +235,7 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
         plt.scatter(csv_data['Time'], csv_data['Passive Torque'], label='passive torque', s=1)
         plt.scatter(csv_data['Time'], csv_data['Coommanded Torque'], label='commanded torque', s=1)
 
-    plt.xlim(0, 20)
+    # plt.xlim(0, 20)
     # plt.ylim(-30, 5)
     plt.xlabel('Time (s)')
     plt.ylabel('Torque (Nm)')
@@ -243,10 +244,10 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
     plt.show()
 
 
-# dir_path = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_neg_torque"
-# dir_path_PEA = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_neg_torque_PEA"
-dir_path = f"/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/traj_neg_torque"
-dir_path_PEA = f"/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/traj_neg_torque_PEA"
+dir_path = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_neg_torque"
+dir_path_PEA = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_neg_torque_PEA"
+# dir_path = f"/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/traj_neg_torque"
+# dir_path_PEA = f"/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/traj_neg_torque_PEA"
 JIM_data_avg, controller_data_avg = load_JIM_controller_avg(dir_path)
 JIM_data_avg_PEA, controller_data_avg_PEA = load_JIM_controller_avg(dir_path_PEA)
 
@@ -256,7 +257,7 @@ plt.scatter(JIM_data_avg['Time'], JIM_data_avg['Torque'], label='JIM torque (no 
 plt.scatter(JIM_data_avg_PEA['Time'], JIM_data_avg_PEA['Torque'], label='JIM torque', color='green', s=1)
 plt.scatter(controller_data_avg['Time'], controller_data_avg['Desire Torque'], label='controller torque', color='red', s=1)
 
-plt.xlim(0, 20)
+# plt.xlim(0, 20)
 # plt.ylim(-30, 5)
 plt.xlabel('Time (s)')
 plt.ylabel('Torque (Nm)')
