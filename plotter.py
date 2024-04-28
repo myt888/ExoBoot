@@ -81,12 +81,10 @@ def load_cam():
 
     file_path_csv = "ExoBoot\\cam_torque_angle\\cam_torque_data.csv"
 
-    if not os.path.exists(file_path_csv):
-        os.makedirs(os.path.dirname(file_path_csv), exist_ok=True)
-        data = pd.DataFrame({'time': all_time, 'angle': all_angle, 'torque': all_torque})
-        data.to_csv(file_path_csv, index=False)
-    else:
-        print(f"The file {file_path_csv} already exists.")
+
+    os.makedirs(os.path.dirname(file_path_csv), exist_ok=True)
+    data = pd.DataFrame({'time': all_time, 'angle': all_angle, 'torque': all_torque})
+    data.to_csv(file_path_csv, index=False)
 
     return all_time, all_angle, all_torque
     
@@ -235,8 +233,6 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
         plt.scatter(csv_data['Time'], csv_data['Passive Torque'], label='passive torque', s=1)
         plt.scatter(csv_data['Time'], csv_data['Coommanded Torque'], label='commanded torque', s=1)
 
-    # plt.xlim(0, 20)
-    # plt.ylim(-30, 5)
     plt.xlabel('Time (s)')
     plt.ylabel('Torque (Nm)')
     plt.legend()
@@ -244,10 +240,10 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
     plt.show()
 
 
-# dir_path = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_neg_torque"
-# dir_path_PEA = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_neg_torque_PEA"
-dir_path = f"/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/traj_neg_torque"
-dir_path_PEA = f"/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/traj_neg_torque_PEA"
+dir_path = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_neg_torque"
+dir_path_PEA = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_neg_torque_PEA"
+# dir_path = f"/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/traj_neg_torque"
+# dir_path_PEA = f"/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/traj_neg_torque_PEA"
 JIM_data_avg, controller_data_avg = load_JIM_controller_avg(dir_path)
 JIM_data_avg_PEA, controller_data_avg_PEA = load_JIM_controller_avg(dir_path_PEA)
 
@@ -266,3 +262,5 @@ JIM_data_avg_PEA, controller_data_avg_PEA = load_JIM_controller_avg(dir_path_PEA
 plot_JIM_vs_controller(JIM_data_avg, controller_data_avg, PI=False)
 proc.calculate_fit_quality(controller_data_avg['Desire Torque'],JIM_data_avg['Torque'])
 proc.calculate_fit_quality(controller_data_avg_PEA['Desire Torque'],JIM_data_avg_PEA['Torque'])
+
+load_cam()
