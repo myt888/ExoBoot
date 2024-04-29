@@ -259,7 +259,7 @@ JIM_data_avg_PEA, controller_data_avg_PEA = load_JIM_controller_avg(dir_path_PEA
 # plt.grid(True)
 # plt.show()
 
-plot_JIM_vs_controller(JIM_data_avg, controller_data_avg, PI=False)
+# plot_JIM_vs_controller(JIM_data_avg, controller_data_avg, PI=False)
 proc.calculate_fit_quality(controller_data_avg['Desire Torque'],JIM_data_avg['Torque'])
 proc.calculate_fit_quality(controller_data_avg_PEA['Desire Torque'],JIM_data_avg_PEA['Torque'])
 
