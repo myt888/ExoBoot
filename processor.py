@@ -1,6 +1,8 @@
 import json
 import time
+import os
 import numpy as np
+import plotter as pt
 import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.signal import butter, filtfilt
@@ -40,6 +42,35 @@ def butter_lowpass_filter(data, cutoff, fs, order):
     b, a = butter(order, normal_cutoff, btype='low', analog=False)
     y = filtfilt(b, a, data)
     return y
+
+
+def load_cam():
+    all_time, all_angle, all_torque = [], [], []
+
+    for i in range(1, 6):
+        file_index = f"{i:03d}"
+
+        file_path_JIM_cal = f"ExoBoot\\cam_torque_angle\\CAL_long_slowsinewithpad{file_index}.mat"
+        file_path_JIM = f"ExoBoot\\cam_torque_angle\\EXO_long_slowsinewithpad{file_index}.mat"
+
+        JIM_time, JIM_angle, JIM_torque = pt.load_mat(file_path_JIM, file_path_JIM_cal, False, True)
+
+        # plt.scatter(JIM_angle, JIM_torque, label=f'Torque_cam_{i}', s=1)
+        all_time.extend(JIM_time)
+        all_angle.extend(JIM_angle)
+        all_torque.extend(JIM_torque)
+
+    all_angle = np.array(all_angle)
+    all_torque = np.array(all_torque)
+    all_time = np.array(all_time)
+
+    file_path_csv = "ExoBoot\\cam_torque_angle\\cam_torque_data.csv"
+
+    os.makedirs(os.path.dirname(file_path_csv), exist_ok=True)
+    data = pd.DataFrame({'time': all_time, 'angle': all_angle, 'torque': all_torque})
+    data.to_csv(file_path_csv, index=False)
+
+    return all_time, all_angle, all_torque
 
 
 def logistic_function(x, L, k, x0):

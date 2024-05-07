@@ -111,6 +111,7 @@ class Controller():
             else:
                 angular_speed = 0
 
+            # Check if the JIM starts moving
             if not synced:
                 des_torque = 0
                 line = 0
@@ -121,8 +122,8 @@ class Controller():
                 if line <= len(self.traj_data) - 1:
                     des_torque = self.traj_data['commanded_torque'][line]
                     # All-negative torque trajectory
-                    if des_torque>0:
-                        des_torque = 0
+                    # if des_torque>0:
+                    #     des_torque = 0
                 else:
                     des_torque = 0  # Set to 0 after finish the trajectory
             

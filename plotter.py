@@ -24,9 +24,9 @@ def load_encoder_csv(file_path, adjust = False):
 
         if adjust == True:
             # Adjusting time and angle
-            adjusted_time, raw_angles = proc.adjusted_data(time, ankle_angle, 1000, 0.1)
+            adjusted_time, raw_angles,_ = proc.adjusted_data(time, ankle_angle, 1000, 0.1)
             initial_angle = raw_angles[0]
-            adjusted_angles = [-(angle - initial_angle) for angle in raw_angles]
+            adjusted_angles = [angle - initial_angle for angle in raw_angles]
 
             # Trim the constant data points at the end
             end_value = np.mean(adjusted_angles[-1000:])
@@ -53,47 +53,20 @@ def load_mat(file_path, calibration_path=None, adjust=False, lpf=False, cutoff=8
         JIM_torque = proc.butter_lowpass_filter(JIM_torque, cutoff, fs, order)
 
     if adjust:
-        adjusted_time, adjusted_angle = proc.adjusted_data(JIM_time, JIM_angle, 100, 0.05)
+        adjusted_time, adjusted_angle,_ = proc.adjusted_data(JIM_time, JIM_angle, 100, 0.05)
         return adjusted_time, adjusted_angle
     else:
         return JIM_time, JIM_angle, JIM_torque
-
-
-def load_cam():
-    all_time, all_angle, all_torque = [], [], []
-
-    for i in range(1, 6):
-        file_index = f"{i:03d}"
-
-        file_path_JIM_cal = f"ExoBoot\\cam_torque_angle\\CAL_long_slowsinewithpad{file_index}.mat"
-        file_path_JIM = f"ExoBoot\\cam_torque_angle\\EXO_long_slowsinewithpad{file_index}.mat"
-
-        JIM_time, JIM_angle, JIM_torque = load_mat(file_path_JIM, file_path_JIM_cal, False, True)
-
-        # plt.scatter(JIM_angle, JIM_torque, label=f'Torque_cam_{i}', s=1)
-        all_time.extend(JIM_time)
-        all_angle.extend(JIM_angle)
-        all_torque.extend(JIM_torque)
-
-    all_angle = np.array(all_angle)
-    all_torque = np.array(all_torque)
-    all_time = np.array(all_time)
-
-    file_path_csv = "ExoBoot\\cam_torque_angle\\cam_torque_data.csv"
-
-
-    os.makedirs(os.path.dirname(file_path_csv), exist_ok=True)
-    data = pd.DataFrame({'time': all_time, 'angle': all_angle, 'torque': all_torque})
-    data.to_csv(file_path_csv, index=False)
-
-    return all_time, all_angle, all_torque
     
 
-def plot_angle_data(encoder_time, encoder_angle, JIM_time = None, JIM_angle = None):
+def plot_angle_data(encoder_path, JIM_path):
+    encoder_time, encoder_angle = load_encoder_csv(encoder_path, adjust=True)
+    JIM_time, JIM_angle = load_mat(JIM_path, calibration_path=None, adjust=True)
+
     plt.figure(figsize=(8, 6))
-    if JIM_time is not None and JIM_angle is not None:
-        plt.scatter(JIM_time, JIM_angle, label='JIM Angle', color='red', s=3)
-    plt.scatter(encoder_time, encoder_angle, label='Encoder Angle', color='blue', s=3)
+    if JIM_path is not None:
+        plt.scatter(JIM_time, JIM_angle, label='JIM angle', s=3)
+    plt.scatter(encoder_time, encoder_angle, label='encoder angle', s=3)
     plt.xlabel('Time')
     plt.ylabel('Ankle Angle')
     plt.grid(True)
@@ -102,7 +75,7 @@ def plot_angle_data(encoder_time, encoder_angle, JIM_time = None, JIM_angle = No
 
 
 def plot_cam_data(fit = None):
-    all_angle, all_torque = load_cam()
+    _, all_angle, all_torque = proc.load_cam()
 
     plt.figure(figsize=(10, 8))
     plt.scatter(all_angle, all_torque, label=f'Torque_cam', s=1)
@@ -238,29 +211,3 @@ def plot_JIM_vs_controller(EXO_data, csv_data, PI=False):
     plt.legend()
     plt.grid(True)
     plt.show()
-
-
-dir_path = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_neg_torque"
-dir_path_PEA = f"I:\\My Drive\\Locomotor\\ExoBoot\\data\\traj_neg_torque_PEA"
-# dir_path = f"/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/traj_neg_torque"
-# dir_path_PEA = f"/Users/yitengma/Library/CloudStorage/GoogleDrive-yitengma@umich.edu/My Drive/Locomotor/ExoBoot/data/traj_neg_torque_PEA"
-JIM_data_avg, controller_data_avg = load_JIM_controller_avg(dir_path)
-JIM_data_avg_PEA, controller_data_avg_PEA = load_JIM_controller_avg(dir_path_PEA)
-
-# plt.figure(figsize=(8, 6), dpi=125)
-
-# plt.scatter(JIM_data_avg['Time'], JIM_data_avg['Torque'], label='JIM torque (no PEA)', s=1)
-# plt.scatter(JIM_data_avg_PEA['Time'], JIM_data_avg_PEA['Torque'], label='JIM torque', color='green', s=1)
-# plt.scatter(controller_data_avg['Time'], controller_data_avg['Desire Torque'], label='controller torque', color='red', s=1)
-
-# plt.xlabel('Time (s)')
-# plt.ylabel('Torque (Nm)')
-# plt.legend()
-# plt.grid(True)
-# plt.show()
-
-# plot_JIM_vs_controller(JIM_data_avg, controller_data_avg, PI=False)
-proc.calculate_fit_quality(controller_data_avg['Desire Torque'],JIM_data_avg['Torque'])
-proc.calculate_fit_quality(controller_data_avg_PEA['Desire Torque'],JIM_data_avg_PEA['Torque'])
-
-load_cam()
